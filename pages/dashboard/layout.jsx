@@ -51,6 +51,8 @@ import Cookies from 'js-cookie'
 var bcrypt = require('bcryptjs')
 import { useRouter } from 'next/router'
 import Link from 'next/link'
+import axios from 'axios'
+import { AbilityBuilder, Abilities } from '@casl/ability'
 
 const menuOptions = [
   {
@@ -83,53 +85,6 @@ const menuOptions = [
       {
         title: "manage user",
         link: "/dashboard/users/manage-user?pageid=users",
-        status: true,
-      },
-    ]
-  },
-  {
-    type: "accordion",
-    name: "services",
-    icon: <BsBriefcaseFill />,
-    children: [
-      {
-        title: "aeps",
-        link: "/dashboard/users/create-user?pageid=users",
-        status: true,
-      },
-      {
-        title: "bbps",
-        link: "/dashboard/users/users-list?pageid=users",
-        status: true,
-      },
-      {
-        title: "recharge",
-        link: "/dashboard/users/users-list?pageid=users",
-        status: true,
-      },
-      {
-        title: "dmt",
-        link: "/dashboard/users/users-list?pageid=users",
-        status: true,
-      },
-      {
-        title: "payout",
-        link: "/dashboard/users/users-list?pageid=users",
-        status: true,
-      },
-      {
-        title: "cms",
-        link: "/dashboard/users/users-list?pageid=users",
-        status: true,
-      },
-      {
-        title: "lic",
-        link: "/dashboard/users/users-list?pageid=users",
-        status: true,
-      },
-      {
-        title: "axis bank account",
-        link: "/dashboard/users/users-list?pageid=users",
         status: true,
       },
     ]
@@ -173,140 +128,11 @@ const menuOptions = [
   },
   {
     type: "accordion",
-    name: "commission package",
-    icon: <FaPercentage />,
-    children: [
-      {
-        title: "create package",
-        link: "/dashboard/commission-package/create-package?pageid=commission",
-        status: true,
-      },
-      {
-        title: "commission setup",
-        link: "/dashboard/commission-package/commission-setup?pageid=commission",
-        status: true,
-      },
-      {
-        title: "view commission",
-        link: "/dashboard/commission-package/view-commission?pageid=commission",
-        status: true,
-      },
-    ]
-  },
-  {
-    type: "accordion",
-    name: "controls",
-    icon: <AiFillApi />,
-    children: [
-      {
-        title: "add operator type",
-        link: "/dashboard/controls/add-operator-category?pageId=controls",
-        status: true,
-      },
-      {
-        title: "add new operator",
-        link: "/dashboard/controls/add-operator?pageId=controls",
-        status: true,
-      },
-      {
-        title: "add cms biller",
-        link: "/dashboard/controls/add-cms-biller?pageId=controls",
-        status: true,
-      },
-      {
-        title: "manage banks",
-        link: "/dashboard/controls/manage-banks?pageId=controls",
-        status: true,
-      },
-      {
-        title: "preferences",
-        link: "/dashboard/controls/preferences?pageId=controls",
-        status: true,
-      },
-    ]
-  },
-  {
-    type: "accordion",
     name: "reports",
     icon: <HiDocumentReport />,
     children: [
       {
-        title: "dmt",
-        link: "/dashboard/reports/payout?pageid=reports",
-        status: true,
-      },
-      {
-        title: "aeps",
-        link: "/dashboard",
-        status: true,
-      },
-      {
-        title: "bbps",
-        link: "/dashboard",
-        status: true,
-      },
-      {
-        title: "recharge",
-        link: "/dashboard",
-        status: true,
-      },
-      {
-        title: "matm",
-        link: "/dashboard",
-        status: true,
-      },
-      {
         title: "payout",
-        link: "/dashboard",
-        status: true,
-      },
-      {
-        title: "cms",
-        link: "/dashboard",
-        status: true,
-      },
-      {
-        title: "pg",
-        link: "/dashboard",
-        status: true,
-      },
-      {
-        title: "qr code",
-        link: "/dashboard",
-        status: true,
-      },
-      {
-        title: "virtual account",
-        link: "/dashboard",
-        status: true,
-      },
-      {
-        title: "fund request",
-        link: "/dashboard",
-        status: true,
-      },
-      {
-        title: "fund transfer",
-        link: "/dashboard",
-        status: true,
-      },
-      {
-        title: "wallet-wallet transfer",
-        link: "/dashboard",
-        status: true,
-      },
-      {
-        title: "lic report",
-        link: "/dashboard",
-        status: true,
-      },
-      {
-        title: "fastag",
-        link: "/dashboard",
-        status: true,
-      },
-      {
-        title: "axis account open",
         link: "/dashboard",
         status: true,
       },
@@ -338,49 +164,6 @@ const menuOptions = [
     link: "/dashboard/support-tickets?pageid=support",
     icon: <IoMdHelpBuoy />,
   },
-  {
-    type: "accordion",
-    name: "website setup",
-    link: "/dashboard/commission?pageid=commission",
-    icon: <FaWrench />,
-    children: [
-      {
-        title: "basic details",
-        link: "/dashboard",
-        status: true,
-      },
-      {
-        title: "header",
-        link: "/dashboard",
-        status: true,
-      },
-      {
-        title: "footer",
-        link: "/dashboard",
-        status: true,
-      },
-      {
-        title: "email",
-        link: "/dashboard",
-        status: true,
-      },
-      {
-        title: "sms",
-        link: "/dashboard",
-        status: true,
-      },
-      {
-        title: "banner setup",
-        link: "/dashboard",
-        status: true,
-      },
-      {
-        title: "notifications",
-        link: "/dashboard",
-        status: true,
-      },
-    ]
-  },
 ]
 
 
@@ -389,9 +172,9 @@ const Layout = (props) => {
   const Router = useRouter()
   const { pageid } = Router.query
   const { isOpen, onClose, onOpen } = useDisclosure()
-
   const [userName, setUserName] = useState("NA")
   const [userType, setUserType] = useState("NA")
+  const { can, build } = new AbilityBuilder(Abilities)
 
   const [permissions, setPermissions] = useState([])
 
@@ -408,17 +191,8 @@ const Layout = (props) => {
     setUserName(localStorage.getItem("userName"))
     setUserType(localStorage.getItem("userType"))
 
-    // Fetching all user Permissions
-    ClientAxios.post('/api/user/fetch', {
-      user_id: localStorage.getItem("userId")
-    }).then((res)=>{
-      setPermissions(res.data.permissions)
-      console.log(permissions)
-    }).catch((err)=>{
-      console.log("Could not feetch permissions")
-    })
-
   }, [])
+
 
 
 
@@ -432,9 +206,6 @@ const Layout = (props) => {
     }
   }, [])
 
-  // useEffect(() => {
-  //   BackendAxios.get("/sanctum/csrf-cookie")
-  // }, [])
 
   async function logout() {
     await BackendAxios.post("/logout").then(() => {
@@ -545,24 +316,6 @@ const Layout = (props) => {
                 </Button>
               </Show>
               <Image src='/logo_long.png' w={16} />
-            </HStack>
-            <HStack spacing={6}>
-              <HStack spacing={2}>
-                <Text fontSize={'xs'}>AePS</Text>
-                <Switch id={'aepsStatus'} />
-              </HStack>
-              <HStack spacing={2}>
-                <Text fontSize={'xs'}>DMT</Text>
-                <Switch id={'dmtStatus'} />
-              </HStack>
-              <HStack spacing={2}>
-                <Text fontSize={'xs'}>BBPS</Text>
-                <Switch id={'bbpsStatus'} />
-              </HStack>
-              <HStack spacing={2}>
-                <Text fontSize={'xs'}>Recharge</Text>
-                <Switch id={'rechargeStatus'} />
-              </HStack>
             </HStack>
           </Stack>
           <Box
