@@ -105,21 +105,6 @@ const menuOptions = [
         status: true,
       },
       {
-        title: "add money",
-        link: "/dashboard/account/add-money?pageid=account",
-        status: true,
-      },
-      {
-        title: "wallet balance",
-        link: "/dashboard/account/wallet-balance?pageid=account",
-        status: true,
-      },
-      {
-        title: "wallet transactions",
-        link: "/dashboard/account/wallet-transactions?pageid=account",
-        status: true,
-      },
-      {
         title: "add bank",
         link: "/dashboard/account/add-bank?pageid=account",
         status: true,
@@ -133,7 +118,7 @@ const menuOptions = [
     children: [
       {
         title: "payout",
-        link: "/dashboard",
+        link: "/dashboard/reports/payout?pageId=reports",
         status: true,
       },
       {
