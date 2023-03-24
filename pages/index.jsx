@@ -220,7 +220,7 @@ const Index = () => {
         placement={'bottom'}
         size={'xs'}
       >
-        <DrawerOverlay />
+        {/* <DrawerOverlay /> */}
         <DrawerContent>
           <DrawerCloseButton />
           <DrawerHeader>

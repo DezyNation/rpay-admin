@@ -48,6 +48,7 @@ import BackendAxios, { ClientAxios } from '@/lib/utils/axios'
 import CheckboxTree from 'react-checkbox-tree'
 import 'react-checkbox-tree/lib/react-checkbox-tree.css';
 import Script from 'next/script'
+import Link from 'next/link'
 
 const ExportPDF = (currentRowData) => {
     const doc = new jsPDF('landscape')
@@ -120,8 +121,8 @@ const Index = () => {
         ]
     }]
 
-    const availableTabs = ['super distributors', 'distributors', 'retailers']
-    const [selectedTab, setSelectedTab] = useState("super_distributor")
+    const availableTabs = ['retailers']
+    const [selectedTab, setSelectedTab] = useState("retailer")
     const [fetchedUsers, setFetchedUsers] = useState([])
 
     const [selectedUser, setSelectedUser] = useState("")
@@ -210,7 +211,7 @@ const Index = () => {
                 description: 'User permissions were updated!'
             })
             fetchUserPermissions()
-        }).catch((err)=>{
+        }).catch((err) => {
             Toast({
                 status: 'error',
                 title: 'Error Occured',
@@ -235,21 +236,8 @@ const Index = () => {
                         <Tab
                             fontSize={['xs', 'lg']}
                             _selected={{ bg: 'twitter.500', color: 'white' }}
-                            onClick={() => setSelectedTab("super_distributor")}
-                        >
-                            Super Distributor
-                        </Tab>
-                        <Tab
-                            fontSize={['xs', 'lg']}
-                            _selected={{ bg: 'twitter.500', color: 'white' }}
-                            onClick={() => setSelectedTab("distributor")}
-                        >
-                            Distributor
-                        </Tab>
-                        <Tab
-                            fontSize={['xs', 'lg']}
-                            _selected={{ bg: 'twitter.500', color: 'white' }}
                             onClick={() => setSelectedTab("retailer")}
+                            width={'xs'} flex={'unset'}
                         >
                             Retailer
                         </Tab>
@@ -313,7 +301,6 @@ const Index = () => {
                                                         <Th>KYC Details</Th>
                                                         <Th>Balance Details</Th>
                                                         <Th>Complete Address</Th>
-                                                        <Th>Parent Details</Th>
                                                         <Th>Actions</Th>
                                                     </Tr>
                                                 </Thead>
@@ -321,10 +308,10 @@ const Index = () => {
                                                     {
                                                         fetchedUsers && fetchedUsers.map((user, key) => {
                                                             return (
-                                                                <Tr>
+                                                                <Tr key={key}>
                                                                     <Td>
                                                                         <Box>
-                                                                            <Text textTransform={'capitalize'}>{user.packages[0].name} Plan</Text><br />
+                                                                            {/* <Text textTransform={'capitalize'}>{user.packages[0].name} Plan</Text><br /> */}
                                                                             <Text>{user.first_name} {user.last_name} </Text>
                                                                             <Text>{user.email}</Text>
                                                                             <Text>
@@ -341,15 +328,13 @@ const Index = () => {
                                                                             <Text><b>Aadhaar No.: </b>&nbsp;&nbsp; {user.aadhaar} </Text>
                                                                             <Text><b>PAN: </b>&nbsp;&nbsp; {user.pan_number} </Text>
                                                                             <Text><b>GST No.: </b>&nbsp;&nbsp; {user.gst_number} </Text><br />
-                                                                            <Text><b>Organisation Code.: </b>&nbsp;&nbsp; {user.organisation_code} </Text>
+                                                                            <Text><b>Organisation Code.: </b>&nbsp;&nbsp; RPAY </Text>
                                                                         </Box>
                                                                     </Td>
                                                                     <Td>
                                                                         <Box>
                                                                             <Text><b>Current Balance: </b>&nbsp;&nbsp; ₹ {user.wallet} </Text>
                                                                             <Text><b>Capping Balance: </b>&nbsp;&nbsp; ₹ {user.minimum_balance} </Text><br />
-                                                                            <Text><b>Distributors' Balance: </b>&nbsp;&nbsp;₹ 495500</Text>
-                                                                            <Text><b>Retailers' Balance: </b>&nbsp;&nbsp;₹ 495500</Text>
                                                                         </Box>
                                                                     </Td>
                                                                     <Td>
@@ -357,12 +342,6 @@ const Index = () => {
                                                                             <Text>{user.line},</Text>
                                                                             <Text>{user.city}, {user.state},</Text>
                                                                             <Text>Pincode - {user.pincode}</Text>
-                                                                        </Box>
-                                                                    </Td>
-                                                                    <Td>
-                                                                        <Box>
-                                                                            <Text>(567) - Admin One</Text>
-                                                                            <Text>+91 7838074742</Text>
                                                                         </Box>
                                                                     </Td>
                                                                     <Td>
@@ -386,8 +365,10 @@ const Index = () => {
                                                                                         <Box>
                                                                                             <VStack alignItems={'flex-start'} spacing={0}>
                                                                                                 <Text w={'full'} pb={1} borderBottom={'1px solid #999'}>Actions</Text>
-                                                                                                <Text p={2} w={'full'} fontSize={'sm'} cursor={'pointer'} _hover={{ bg: 'blue.50' }}>Fund Transfer/Reversal</Text>
-                                                                                                <Text p={2} w={'full'} fontSize={'sm'} cursor={'pointer'} _hover={{ bg: 'blue.50' }}>Scheme</Text>
+                                                                                                <Link href={'/dashboard/account/fund-transfer?pageId=transfer'}>
+                                                                                                    <Text p={2} w={'full'} fontSize={'sm'} cursor={'pointer'} _hover={{ bg: 'blue.50' }}>Fund Transfer/Reversal</Text>
+                                                                                                </Link>
+                                                                                                {/* <Text p={2} w={'full'} fontSize={'sm'} cursor={'pointer'} _hover={{ bg: 'blue.50' }}>Scheme</Text> */}
                                                                                             </VStack>
                                                                                             <Box h={8} w={'full'}></Box>
                                                                                             <VStack alignItems={'flex-start'} spacing={0}>
@@ -401,37 +382,22 @@ const Index = () => {
                                                                                                 >
                                                                                                     Permissions
                                                                                                 </Text>
-                                                                                                <Text p={2} w={'full'} fontSize={'sm'} cursor={'pointer'} _hover={{ bg: 'blue.50' }}>View Profile</Text>
-                                                                                                <Text p={2} w={'full'} fontSize={'sm'} cursor={'pointer'} _hover={{ bg: 'blue.50' }}>KYC Management</Text>
+                                                                                                {/* <Text p={2} w={'full'} fontSize={'sm'} cursor={'pointer'} _hover={{ bg: 'blue.50' }}>View Profile</Text> */}
+                                                                                                <Link href={'/dashboard/users/manage-user?pageId=users'}>
+                                                                                                    <Text p={2} w={'full'} fontSize={'sm'} cursor={'pointer'} _hover={{ bg: 'blue.50' }}>Edit Profile</Text>
+                                                                                                </Link>
                                                                                             </VStack>
                                                                                         </Box>
                                                                                     </PopoverBody>
                                                                                 </PopoverContent>
                                                                             </Popover>
 
-                                                                            <Popover>
-                                                                                <PopoverTrigger>
-                                                                                    <Button
-                                                                                        rightIcon={<BsChevronDown />}
-                                                                                        size={'sm'} colorScheme={'whatsapp'}
-                                                                                    >
-                                                                                        Reports
-                                                                                    </Button>
-                                                                                </PopoverTrigger>
-                                                                                <PopoverContent>
-                                                                                    <PopoverBody>
-                                                                                        <Box>
-                                                                                            <VStack alignItems={'flex-start'} spacing={0}>
-                                                                                                <Text p={2} w={'full'} fontSize={'sm'} cursor={'pointer'} _hover={{ bg: 'blue.50' }}>AePS Report</Text>
-                                                                                                <Text p={2} w={'full'} fontSize={'sm'} cursor={'pointer'} _hover={{ bg: 'blue.50' }}>BbPS Report</Text>
-                                                                                                <Text p={2} w={'full'} fontSize={'sm'} cursor={'pointer'} _hover={{ bg: 'blue.50' }}>DMT Report</Text>
-                                                                                                <Text p={2} w={'full'} fontSize={'sm'} cursor={'pointer'} _hover={{ bg: 'blue.50' }}>Recharge Report</Text>
-                                                                                                <Text p={2} w={'full'} fontSize={'sm'} cursor={'pointer'} _hover={{ bg: 'blue.50' }}>User Ledger</Text>
-                                                                                            </VStack>
-                                                                                        </Box>
-                                                                                    </PopoverBody>
-                                                                                </PopoverContent>
-                                                                            </Popover>
+
+                                                                            <Button
+                                                                                size={'sm'} colorScheme={'whatsapp'}
+                                                                            >
+                                                                                View Report
+                                                                            </Button>
                                                                         </VStack>
                                                                     </Td>
                                                                 </Tr>
@@ -451,7 +417,6 @@ const Index = () => {
                                                         <Th>KYC Details</Th>
                                                         <Th>Balance Details</Th>
                                                         <Th>Complete Address</Th>
-                                                        <Th>Parent Details</Th>
                                                     </Tr>
                                                 </Thead>
                                                 <Tbody fontSize={'xs'}>
@@ -461,7 +426,7 @@ const Index = () => {
                                                                 <Tr>
                                                                     <Td>
                                                                         <Box>
-                                                                            <Text textTransform={'capitalize'}>{user.packages[0].name} Plan</Text><br /><br />
+                                                                            {/* <Text textTransform={'capitalize'}>{user.packages[0].name} Plan</Text><br /><br /> */}
                                                                             <Text>{user.first_name} {user.last_name} </Text><br />
                                                                             <Text>{user.email}</Text><br />
                                                                             <Text><br />
@@ -478,15 +443,13 @@ const Index = () => {
                                                                             <Text><b>Aadhaar No.: </b>&nbsp;&nbsp; {user.aadhaar} </Text><br />
                                                                             <Text><b>PAN: </b>&nbsp;&nbsp; {user.pan_number} </Text><br />
                                                                             <Text><b>GST No.: </b>&nbsp;&nbsp; {user.gst_number} </Text><br /><br />
-                                                                            <Text><b>Organisation Code.: </b>&nbsp;&nbsp; {user.organisation_code} </Text><br />
+                                                                            <Text><b>Organisation Code.: </b>&nbsp;&nbsp; RPAY </Text><br />
                                                                         </Box>
                                                                     </Td>
                                                                     <Td>
                                                                         <Box>
                                                                             <Text><b>Current Balance: </b>&nbsp;&nbsp; Rs. {user.wallet} </Text><br />
                                                                             <Text><b>Capping Balance: </b>&nbsp;&nbsp; Rs. {user.minimum_balance} </Text><br /><br />
-                                                                            <Text><b>Distributors' Balance: </b>&nbsp;&nbsp;Rs. 495500</Text><br />
-                                                                            <Text><b>Retailers' Balance: </b>&nbsp;&nbsp;Rs. 495500</Text><br />
                                                                         </Box>
                                                                     </Td>
                                                                     <Td>
@@ -494,12 +457,6 @@ const Index = () => {
                                                                             <Text>{user.line},</Text><br />
                                                                             <Text>{user.city}, {user.state},</Text><br />
                                                                             <Text>Pincode - {user.pincode}</Text><br />
-                                                                        </Box>
-                                                                    </Td>
-                                                                    <Td>
-                                                                        <Box>
-                                                                            <Text>(567) - Admin One</Text><br />
-                                                                            <Text>+91 7838074742</Text><br />
                                                                         </Box>
                                                                     </Td>
                                                                 </Tr>

@@ -56,18 +56,18 @@ const FundTransfer = () => {
 
     const [columnDefs, setColumnDefs] = useState([
         { field: "actions" },
-        { field: "request datetime" },
-        { field: "Trnxn ID" },
-        { field: "amount" },
-        { field: "requested bank" },
-        { field: "transaction type" },
-        { field: "transaction receipt" },
-        { field: "user name" },
-        { field: "user id" },
-        { field: "phone no." },
-        { field: "update datetime" },
-        { field: "updated by" },
-        { field: "remarks" },
+        { headerName: "request datetime", field: 'created_at' },
+        { headerName: "Trnxn ID", field: 'transaction_id' },
+        { headerName: "amount", field: 'amount' },
+        { headerName: "requested bank", field: 'bank_name' },
+        { headerName: "transaction type", field: 'transaction_type' },
+        { headerName: "transaction receipt", field: 'receipt' },
+        { headerName: "user name", field: 'name' },
+        { headerName: "user id", field: 'beneficiary_id' },
+        { headerName: "phone no.", field: 'phone_number' },
+        { headerName: "update datetime", field: 'updated_at' },
+        { headerName: "updated by", field: 'user_id' },
+        { headerName: "remarks", field: 'remarks' },
     ])
 
     return (

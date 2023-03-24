@@ -32,10 +32,6 @@ const Index = () => {
     })
     const Formik = useFormik({
         initialValues: {
-            userType: "",
-            userPlan: "",
-            hasParent: "0",
-            parent: "",
             firstName: "",
             lastName: "",
             userEmail: "",
@@ -64,70 +60,31 @@ const Index = () => {
             pan: null,
         },
         onSubmit: (values) => {
-            let userForm = document.getElementById('createUserForm')
-            FormAxios.postForm('/api/admin/create/user', userForm).then((res) => {
-                Toast({
-                    status: 'success',
-                    title: 'User Created',
+            if (values.profilePic && values.aadhaarBack && values.aadhaarFront && values.pan) {
+                let userForm = document.getElementById('createUserForm')
+                FormAxios.postForm('/admin-register', userForm).then((res) => {
+                    Toast({
+                        status: 'success',
+                        title: 'User Created',
+                    })
+                    console.log(res.data)
+                }).catch((err) => {
+                    Toast({
+                        status: 'error',
+                        title: err.message,
+                    })
+                    console.log(err)
                 })
-                console.log(res.data)
-            }).catch((err) => {
+            }
+            else{
                 Toast({
                     status: 'error',
-                    title: err.message,
+                    description: 'All images are mandatory'
                 })
-                console.log(err)
-            })
+            }
         }
     })
 
-    useEffect(() => {
-        let userToFetch
-        setAvailableParents([])
-        setAvailablePlans([])
-        setIsParentInputDisabled(true)
-        setIsPlanInputDisabled(true)
-        if (Formik.values.userType) {
-            BackendAxios.get(`/api/admin/packages/${Formik.values.userType}`).then((res) => {
-                setAvailablePlans(res.data[0].roles.map((plan) => {
-                    return {
-                        planName: plan.pivot.name,
-                        planId: plan.pivot.id,
-                    }
-                }))
-                setIsPlanInputDisabled(false)
-            })
-
-            if (Formik.values.userType != "1") {
-                if (Formik.values.userType == "3") userToFetch = "distributor"
-                if (Formik.values.userType == "2") userToFetch = "super_distributor"
-                if (Formik.values.userType == "4") userToFetch = "admin"
-                BackendAxios.get(
-                    `/api/admin/get-users/${userToFetch}`).then((res) => {
-                        setAvailableParents(
-                            res.data.map((child) => {
-                                return {
-                                    name: child.name,
-                                    user_id: child.id
-                                }
-                            })
-                        )
-                        setIsParentInputDisabled(false)
-                    }).catch((err) => {
-                        console.log(err)
-                        Toast({
-                            status: 'error',
-                            description: err.message
-                        })
-                    })
-            }
-
-        }
-        if (!Formik.values.userType) {
-            setAvailablePlans([])
-            setIsPlanInputDisabled(false)
-        }
-    }, [Formik.values.userType])
 
     return (
         <>
@@ -140,102 +97,6 @@ const Index = () => {
                         spacing={4}
                     >
                         <Box py={4} w={['full', '3xl']} flex={['unset', 7]}>
-                            <Stack direction={['column', 'row']} spacing={4}>
-                                <FormControl w={['full', 'xs']}>
-                                    <FormLabel>User Type</FormLabel>
-                                    <Select
-                                        name='userType'
-                                        bg={'white'}
-                                        placeholder={'Select here'}
-                                        value={Formik.values.userType}
-                                        onChange={Formik.handleChange}
-                                    >
-                                        <option value="3">Retailer</option>
-                                        <option value="2">Distributor</option>
-                                        <option value="4">Super Distributor</option>
-                                        <option value="1">Admin (Whitelabel)</option>
-                                    </Select>
-                                </FormControl>
-                                <FormControl w={['full', 'xs']}>
-                                    <FormLabel>User Plan</FormLabel>
-                                    <Select
-                                        name='userPlan'
-                                        bg={'white'}
-                                        placeholder={'Select here'}
-                                        value={Formik.values.userPlan}
-                                        onChange={Formik.handleChange}
-                                        isDisabled={isPlanInputDisabled}
-                                    >
-                                        {
-                                            availablePlans.map((plan, key) => {
-                                                return <option value={plan.planId} key={key}>{plan.planName}</option>
-                                            })
-                                        }
-                                    </Select>
-                                </FormControl>
-                                <input type={'hidden'} name={'hasParent'} value={Formik.values.userType == "1" ? "0" : "1"} />
-                                {
-                                    // Ask parent distributor if user type is retailer
-                                    Formik.values.userType == "3" &&
-                                    <FormControl w={['full', 'xs']}>
-                                        <FormLabel>Parent Distributor</FormLabel>
-                                        <Select
-                                            name='parent'
-                                            bg={'white'}
-                                            value={Formik.values.parent}
-                                            onChange={Formik.handleChange}
-                                            isDisabled={isParentInputDisabled}
-                                        >
-                                            {
-                                                availableParents.map((parent, key) => {
-                                                    return <option value={parent.user_id} key={key}>{parent.name}</option>
-                                                })
-                                            }
-                                        </Select>
-                                    </FormControl>
-                                }
-                                {
-                                    // Ask parent super distributor if user type is distributor
-                                    Formik.values.userType == "2" &&
-                                    <FormControl w={['full', 'xs']}>
-                                        <FormLabel>Parent Super Distributor</FormLabel>
-                                        <Select
-                                            name='parent'
-                                            bg={'white'}
-                                            value={Formik.values.parent}
-                                            onChange={Formik.handleChange}
-                                            isDisabled={isParentInputDisabled}
-                                        >
-                                            {
-                                                availableParents.map((parent, key) => {
-                                                    return <option value={parent.user_id} key={key}>{parent.name}</option>
-                                                })
-                                            }
-                                        </Select>
-                                    </FormControl>
-                                }
-                                {
-                                    // Ask parent admin if user type is super distributor
-                                    Formik.values.userType == "4" &&
-                                    <FormControl w={['full', 'xs']}>
-                                        <FormLabel>Parent Admin (Whitelabel)</FormLabel>
-                                        <Select
-                                            name='parent'
-                                            bg={'white'}
-                                            value={Formik.values.parent}
-                                            onChange={Formik.handleChange}
-                                            isDisabled={isParentInputDisabled}
-                                        >
-                                            {
-                                                availableParents.map((parent, key) => {
-                                                    return <option value={parent.user_id} key={key}>{parent.name}</option>
-                                                })
-                                            }
-                                        </Select>
-                                    </FormControl>
-                                }
-
-                            </Stack>
 
                             <Box
                                 p={2} mt={8} mb={4}
@@ -246,7 +107,7 @@ const Index = () => {
                                 direction={['column', 'row']}
                                 spacing={4} py={4}
                             >
-                                <FormControl w={['full', 'xs']}>
+                                <FormControl w={['full', 'xs']} isRequired>
                                     <FormLabel>User Name</FormLabel>
                                     <HStack spacing={2}>
                                         <Input
@@ -261,7 +122,7 @@ const Index = () => {
                                         />
                                     </HStack>
                                 </FormControl>
-                                <FormControl w={['full', 'xs']}>
+                                <FormControl w={['full', 'xs']} isRequired>
                                     <FormLabel>User Email</FormLabel>
                                     <Input
                                         name='userEmail' bg={'white'}
@@ -270,7 +131,7 @@ const Index = () => {
                                     />
                                 </FormControl>
 
-                                <FormControl w={['full', 'xs']}>
+                                <FormControl w={['full', 'xs']} isRequired>
                                     <FormLabel>User Phone Number</FormLabel>
                                     <Input
                                         name='userPhone' bg={'white'}
@@ -284,7 +145,7 @@ const Index = () => {
                                 direction={['column', 'row']}
                                 spacing={4} py={4}
                             >
-                                <FormControl w={['full', 'xs']}>
+                                <FormControl w={['full', 'xs']} isRequired>
                                     <FormLabel>Alternative Mobile Number</FormLabel>
                                     <Input
                                         name='alternatePhone' bg={'white'}
@@ -292,7 +153,7 @@ const Index = () => {
                                         placeholder={'Alternate Phone Number'}
                                     />
                                 </FormControl>
-                                <FormControl w={['full', 'xs']}>
+                                <FormControl w={['full', 'xs']} isRequired>
                                     <FormLabel>User DoB</FormLabel>
                                     <Input
                                         name='dob' bg={'white'}
@@ -302,7 +163,7 @@ const Index = () => {
                                     />
                                 </FormControl>
 
-                                <FormControl w={['full', 'xs']}>
+                                <FormControl w={['full', 'xs']} isRequired>
                                     <FormLabel>Gender</FormLabel>
                                     <RadioGroup name='gender' onChange={Formik.handleChange}>
                                         <HStack spacing={6} >
@@ -317,7 +178,7 @@ const Index = () => {
                                 direction={['column', 'row']}
                                 spacing={4} py={4}
                             >
-                                <FormControl w={['full', 'xs']}>
+                                <FormControl w={['full', 'xs']} isRequired>
                                     <FormLabel>Firm Name</FormLabel>
                                     <Input
                                         name='firmName' bg={'white'}
@@ -325,7 +186,7 @@ const Index = () => {
                                         placeholder={'Enter Firm Name'}
                                     />
                                 </FormControl>
-                                <FormControl w={['full', 'xs']}>
+                                <FormControl w={['full', 'xs']} isRequired>
                                     <FormLabel>Company Type</FormLabel>
                                     <Select
                                         name={'companyType'}
@@ -351,14 +212,14 @@ const Index = () => {
                                 py={4} spacing={4}
                                 direction={['column', 'row']}
                             >
-                                <FormControl w={['full', 'xs']}>
+                                <FormControl w={['full', 'xs']} isRequired>
                                     <FormLabel>KYC Status</FormLabel>
                                     <Input
                                         name='kycStatus' bg={'white'}
                                         disabled value={'undefined'}
                                     />
                                 </FormControl>
-                                <FormControl w={['full', 'xs']}>
+                                <FormControl w={['full', 'xs']} isRequired>
                                     <FormLabel>Aadhaar Number</FormLabel>
                                     <Input
                                         name='aadhaarNum' bg={'white'}
@@ -367,7 +228,7 @@ const Index = () => {
                                         onChange={Formik.handleChange}
                                     />
                                 </FormControl>
-                                <FormControl w={['full', 'xs']}>
+                                <FormControl w={['full', 'xs']} isRequired>
                                     <FormLabel>PAN Number</FormLabel>
                                     <Input
                                         name='panNum' bg={'white'}
@@ -381,7 +242,7 @@ const Index = () => {
                                 py={4} spacing={4}
                                 direction={['column', 'row']}
                             >
-                                <FormControl w={['full', 'xs']}>
+                                <FormControl w={['full', 'xs']} isRequired>
                                     <FormLabel>GST Number</FormLabel>
                                     <Input
                                         name='gst' bg={'white'}
@@ -389,7 +250,7 @@ const Index = () => {
                                         onChange={Formik.handleChange}
                                     />
                                 </FormControl>
-                                <FormControl w={['full', 'xs']}>
+                                <FormControl w={['full', 'xs']} isRequired>
                                     <FormLabel>Referral Code</FormLabel>
                                     <Input
                                         bg={'white'}
@@ -407,7 +268,7 @@ const Index = () => {
 
                             </Box>
                             <Box py={4}>
-                                <FormControl>
+                                <FormControl isRequired>
                                     <HStack justifyContent={'space-between'}>
                                         <FormLabel>Is user active?</FormLabel>
                                         <input type="hidden" name='isActive' value={Formik.values.isActive} />
@@ -440,7 +301,7 @@ const Index = () => {
                                 </Box>
                                 <Box p={4}>
                                     <VStack spacing={6}>
-                                        <FormControl w={['full']}>
+                                        <FormControl w={['full']} isRequired>
                                             <FormLabel>Capping Amount</FormLabel>
                                             <Input
                                                 type={'number'} bg={'white'}
@@ -448,7 +309,7 @@ const Index = () => {
                                                 onChange={Formik.handleChange}
                                             />
                                         </FormControl>
-                                        <FormControl w={['full']}>
+                                        <FormControl w={['full']} isRequired>
                                             <FormLabel>Email Verified</FormLabel>
                                             <RadioGroup
                                                 name={'emailVerified'}
@@ -460,7 +321,7 @@ const Index = () => {
                                                 </HStack>
                                             </RadioGroup>
                                         </FormControl>
-                                        <FormControl w={['full']}>
+                                        <FormControl w={['full']} isRequired>
                                             <FormLabel>Mobile Verified</FormLabel>
                                             <RadioGroup
                                                 name={'phoneVerified'}
@@ -491,7 +352,7 @@ const Index = () => {
                                 </Box>
                                 <Box p={4}>
                                     <VStack spacing={6}>
-                                        <FormControl w={['full']}>
+                                        <FormControl w={['full']} isRequired>
                                             <FormLabel>Street Address</FormLabel>
                                             <Input
                                                 bg={'white'}
@@ -499,7 +360,7 @@ const Index = () => {
                                                 onChange={Formik.handleChange}
                                             />
                                         </FormControl>
-                                        <FormControl w={['full']}>
+                                        <FormControl w={['full']} isRequired>
                                             <FormLabel>City</FormLabel>
                                             <Input
                                                 bg={'white'}
@@ -507,7 +368,7 @@ const Index = () => {
                                                 onChange={Formik.handleChange}
                                             />
                                         </FormControl>
-                                        <FormControl w={['full']}>
+                                        <FormControl w={['full']} isRequired>
                                             <FormLabel>State</FormLabel>
                                             <Select name='state'
                                                 placeholder='Select here'
@@ -517,7 +378,7 @@ const Index = () => {
                                                 <option value="Delhi">Delhi</option>
                                             </Select>
                                         </FormControl>
-                                        <FormControl w={['full']}>
+                                        <FormControl w={['full']} isRequired>
                                             <FormLabel>Pincode</FormLabel>
                                             <Input
                                                 type={'number'} maxLength={6}
@@ -537,7 +398,7 @@ const Index = () => {
                             direction={['column', 'row']}
                             spacing={12}
                         >
-                            <FormControl
+                            <FormControl isRequired
                                 w={['full', '36']}
                             >
                                 <FormLabel
@@ -566,7 +427,7 @@ const Index = () => {
                                     onClick={(e) => Formik.setFieldValue('profilePic', null)}
                                 >Delete</Button>
                             </FormControl>
-                            <FormControl
+                            <FormControl isRequired
                                 w={['full', '36']}
                             >
                                 <FormLabel
@@ -595,7 +456,7 @@ const Index = () => {
                                     onClick={(e) => Formik.setFieldValue('aadhaarFront', null)}
                                 >Delete</Button>
                             </FormControl>
-                            <FormControl
+                            <FormControl isRequired
                                 w={['full', '36']}
                             >
                                 <FormLabel
@@ -624,7 +485,7 @@ const Index = () => {
                                     onClick={(e) => Formik.setFieldValue('aadhaarBack', null)}
                                 >Delete</Button>
                             </FormControl>
-                            <FormControl
+                            <FormControl isRequiredl
                                 w={['full', '36']}
                             >
                                 <FormLabel

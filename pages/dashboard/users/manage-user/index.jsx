@@ -59,10 +59,10 @@ const Index = () => {
         },
         onSubmit: (values) => {
             let userForm = document.getElementById('createUserForm')
-            FormAxios.postForm('/api/admin/create/user', userForm).then((res) => {
+            FormAxios.postForm('/admin-update-user', userForm).then((res) => {
                 Toast({
                     status: 'success',
-                    title: 'User Created',
+                    title: 'User Updated',
                 })
                 console.log(res.data)
             }).catch((err) => {
@@ -109,6 +109,7 @@ const Index = () => {
                 <Layout pageTitle={'Edit User'}>
                     <Text fontWeight={'semibold'} fontSize={'lg'}>Edit</Text>
 
+                    <input type="hidden" name={'userId'} value={Formik.values.userId} />
                     <FormControl>
                         <FormLabel>Enter User ID to edit details</FormLabel>
                         <HStack>
