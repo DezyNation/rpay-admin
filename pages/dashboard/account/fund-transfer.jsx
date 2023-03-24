@@ -32,12 +32,9 @@ import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import BackendAxios from '@/lib/utils/axios'
 import Layout from '../layout';
-import axios from 'axios';
-import { createCanBoundTo } from '@casl/react';
 
 const FundTransfer = () => {
     const { isOpen, onOpen, onClose } = useDisclosure()
-    const [permissions, setPermissions] = useState([])
 
     const Toast = useToast({
         position: 'top-right'

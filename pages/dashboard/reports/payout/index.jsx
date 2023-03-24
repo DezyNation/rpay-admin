@@ -96,6 +96,7 @@ const Index = () => {
           <table id={'printable-table'}>
             <thead>
               <tr>
+                <td>#</td>
                 {
                   colDefs.map((def, key) => {
                     return <th key={key}>{def.headerName}</th>

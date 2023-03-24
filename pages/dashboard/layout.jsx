@@ -87,6 +87,11 @@ const menuOptions = [
         link: "/dashboard/users/manage-user?pageid=users",
         status: true,
       },
+      {
+        title: "manage admins",
+        link: "/dashboard/users/create-admin?pageid=users",
+        status: true,
+      },
     ]
   },
   {
@@ -123,12 +128,12 @@ const menuOptions = [
       },
       {
         title: "transaction ledger",
-        link: "/dashboard",
+        link: "/dashboard/reports/transactions?pageId=reports",
         status: true,
       },
       {
         title: "daily sales",
-        link: "/dashboard",
+        link: "/dashboard/reports/transactions/daily?pageId=reports",
         status: true,
       },
       {
