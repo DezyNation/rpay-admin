@@ -56,10 +56,22 @@ import { AbilityBuilder, Abilities } from '@casl/ability'
 
 const menuOptions = [
   {
-    type: "link",
+    type: "accordion",
     name: "profile",
     link: "/dashboard/profile?pageid=profile",
-    icon: <FaUser />
+    icon: <FaUser />,
+    children: [
+      {
+        title: "reset password",
+        link: "/dashboard/profile/reset-password?pageid=profile",
+        status: true,
+      },
+      {
+        title: "reset MPIN",
+        link: "/dashboard/profile/reset-mpin?pageid=profile",
+        status: true,
+      },
+    ]
   },
   {
     type: "link",
@@ -110,8 +122,8 @@ const menuOptions = [
         status: true,
       },
       {
-        title: "add bank",
-        link: "/dashboard/account/add-bank?pageid=account",
+        title: "manage banks",
+        link: "/dashboard/controls/manage-banks?pageid=account",
         status: true,
       },
     ]
@@ -138,7 +150,7 @@ const menuOptions = [
       },
       {
         title: "user ledger",
-        link: "/dashboard",
+        link: "/dashboard/reports/transactions/user-ledger?pageId=reports",
         status: true,
       },
       {
@@ -162,6 +174,7 @@ const Layout = (props) => {
   const Router = useRouter()
   const { pageid } = Router.query
   const { isOpen, onClose, onOpen } = useDisclosure()
+  const [firmName, setFirmName] = useState("")
   const [userName, setUserName] = useState("NA")
   const [userType, setUserType] = useState("NA")
   const { can, build } = new AbilityBuilder(Abilities)
@@ -174,6 +187,8 @@ const Layout = (props) => {
       activePage.style.background = "#3C79F5"
       activePage.style.color = "#FFF"
     }
+
+    setFirmName(process.env.NEXT_PUBLIC_ORGANISATION)
   }, [])
 
   // Feeding all user details to the sidepanel
@@ -191,6 +206,7 @@ const Layout = (props) => {
     if (authentic != true) {
       BackendAxios.post("/logout").then(() => {
         Cookies.remove("verified")
+        localStorage.clear()
       })
       setTimeout(() => Router.push("/"), 2000)
     }
@@ -200,6 +216,7 @@ const Layout = (props) => {
   async function logout() {
     await BackendAxios.post("/logout").then(() => {
       Cookies.remove("verified")
+      localStorage.clear()
     })
     setTimeout(() => Router.push("/"), 2000)
   }
@@ -219,7 +236,7 @@ const Layout = (props) => {
             <VStack py={8}>
               <Image src='https://xsgames.co/randomusers/assets/avatars/male/8.jpg' boxSize={24} rounded={'full'} />
               <Text fontSize={'xl'} color={'#444'} textTransform={'capitalize'}>{userName}</Text>
-              <Text fontSize={'sm'} color={'#666'} textTransform={'capitalize'}>FirmName - {userType}</Text>
+              <Text fontSize={'sm'} color={'#666'} textTransform={'capitalize'}>{firmName} - {userType}</Text>
             </VStack>
             <VStack spacing={2} w={'full'}>
               {

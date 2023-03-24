@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import Layout from '../../layout'
-import { AgGridReact } from 'ag-grid-react'
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-alpine.css';
 import {
     Box,
     Button,
@@ -13,6 +10,9 @@ import {
 import BackendAxios from '@/lib/utils/axios';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable'
+import { AgGridReact } from 'ag-grid-react'
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-alpine.css';
 
 const ExportPDF = () => {
     const doc = new jsPDF('landscape')
