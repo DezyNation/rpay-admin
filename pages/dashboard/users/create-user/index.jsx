@@ -76,7 +76,7 @@ const Index = () => {
                     console.log(err)
                 })
             }
-            else{
+            else {
                 Toast({
                     status: 'error',
                     description: 'All images are mandatory'
@@ -107,36 +107,31 @@ const Index = () => {
                                 direction={['column', 'row']}
                                 spacing={4} py={4}
                             >
-                                <FormControl w={['full', 'xs']} isRequired>
-                                    <FormLabel>User Name</FormLabel>
-                                    <HStack spacing={2}>
-                                        <Input
-                                            name='firstName' bg={'white'}
-                                            onChange={Formik.handleChange}
-                                            placeholder={'First Name'}
-                                        />
-                                        <Input
-                                            name='lastName' bg={'white'}
-                                            onChange={Formik.handleChange}
-                                            placeholder={'Last Name'}
-                                        />
-                                    </HStack>
-                                </FormControl>
-                                <FormControl w={['full', 'xs']} isRequired>
-                                    <FormLabel>User Email</FormLabel>
+                                <FormControl w={['full', '56']} isRequired>
+                                    <FormLabel fontSize={12}>User Name</FormLabel>
                                     <Input
+                                    fontSize={12}
+                                        name='firstName' bg={'white'}
+                                        onChange={Formik.handleChange}
+                                        placeholder={'First Name'}
+                                    />
+                                </FormControl>
+                                <FormControl w={['full', '56']} isRequired>
+                                    <FormLabel fontSize={12}>Last Name</FormLabel>
+                                    <Input
+                                    fontSize={12}
+                                        name='lastName' bg={'white'}
+                                        onChange={Formik.handleChange}
+                                        placeholder={'Last Name'}
+                                    />
+                                </FormControl>
+                                <FormControl w={['full', '56']} isRequired>
+                                    <FormLabel fontSize={12}>User Email</FormLabel>
+                                    <Input
+                                    fontSize={12}
                                         name='userEmail' bg={'white'}
                                         onChange={Formik.handleChange}
                                         placeholder={'Enter User Email'}
-                                    />
-                                </FormControl>
-
-                                <FormControl w={['full', 'xs']} isRequired>
-                                    <FormLabel>User Phone Number</FormLabel>
-                                    <Input
-                                        name='userPhone' bg={'white'}
-                                        onChange={Formik.handleChange}
-                                        placeholder={'Enter Phone Number'}
                                     />
                                 </FormControl>
 
@@ -145,26 +140,42 @@ const Index = () => {
                                 direction={['column', 'row']}
                                 spacing={4} py={4}
                             >
-                                <FormControl w={['full', 'xs']} isRequired>
-                                    <FormLabel>Alternative Mobile Number</FormLabel>
+
+                                <FormControl w={['full', '56']} isRequired>
+                                    <FormLabel fontSize={12}>User Phone Number</FormLabel>
                                     <Input
+                                    fontSize={12}
+                                        name='userPhone' bg={'white'}
+                                        onChange={Formik.handleChange}
+                                        placeholder={'Enter Phone Number'}
+                                    />
+                                </FormControl>
+                                <FormControl w={['full', '56']} isRequired>
+                                    <FormLabel fontSize={12}>Alternative Mobile Number</FormLabel>
+                                    <Input
+                                    fontSize={12}
                                         name='alternatePhone' bg={'white'}
                                         onChange={Formik.handleChange}
                                         placeholder={'Alternate Phone Number'}
                                     />
                                 </FormControl>
-                                <FormControl w={['full', 'xs']} isRequired>
-                                    <FormLabel>User DoB</FormLabel>
+                                <FormControl w={['full', '56']} isRequired>
+                                    <FormLabel fontSize={12}>User DoB</FormLabel>
                                     <Input
+                                    fontSize={12}
                                         name='dob' bg={'white'}
                                         type={'date'}
                                         onChange={Formik.handleChange}
                                         placeholder={'Enter User Email'}
                                     />
                                 </FormControl>
-
-                                <FormControl w={['full', 'xs']} isRequired>
-                                    <FormLabel>Gender</FormLabel>
+                            </Stack>
+                            <Stack
+                                direction={['column', 'row']}
+                                spacing={4} py={4}
+                            >
+                                <FormControl w={['full', '56']} isRequired>
+                                    <FormLabel fontSize={12}>Gender</FormLabel>
                                     <RadioGroup name='gender' onChange={Formik.handleChange}>
                                         <HStack spacing={6} >
                                             <Radio value='male'>Male</Radio>
@@ -172,22 +183,17 @@ const Index = () => {
                                         </HStack>
                                     </RadioGroup>
                                 </FormControl>
-
-                            </Stack>
-                            <Stack
-                                direction={['column', 'row']}
-                                spacing={4} py={4}
-                            >
-                                <FormControl w={['full', 'xs']} isRequired>
-                                    <FormLabel>Firm Name</FormLabel>
+                                <FormControl w={['full', '56']} isRequired>
+                                    <FormLabel fontSize={12}>Firm Name</FormLabel>
                                     <Input
+                                    fontSize={12}
                                         name='firmName' bg={'white'}
                                         onChange={Formik.handleChange}
                                         placeholder={'Enter Firm Name'}
                                     />
                                 </FormControl>
-                                <FormControl w={['full', 'xs']} isRequired>
-                                    <FormLabel>Company Type</FormLabel>
+                                <FormControl w={['full', '56']} isRequired>
+                                    <FormLabel fontSize={12}>Company Type</FormLabel>
                                     <Select
                                         name={'companyType'}
                                         onChange={Formik.handleChange}
@@ -212,25 +218,28 @@ const Index = () => {
                                 py={4} spacing={4}
                                 direction={['column', 'row']}
                             >
-                                <FormControl w={['full', 'xs']} isRequired>
-                                    <FormLabel>KYC Status</FormLabel>
+                                <FormControl w={['full', '56']} isRequired>
+                                    <FormLabel fontSize={12}>KYC Status</FormLabel>
                                     <Input
+                                    fontSize={12}
                                         name='kycStatus' bg={'white'}
                                         disabled value={'undefined'}
                                     />
                                 </FormControl>
-                                <FormControl w={['full', 'xs']} isRequired>
-                                    <FormLabel>Aadhaar Number</FormLabel>
+                                <FormControl w={['full', '56']} isRequired>
+                                    <FormLabel fontSize={12}>Aadhaar Number</FormLabel>
                                     <Input
+                                    fontSize={12}
                                         name='aadhaarNum' bg={'white'}
                                         placeholder={'Enter Aadhaar Number'}
                                         maxLength={12}
                                         onChange={Formik.handleChange}
                                     />
                                 </FormControl>
-                                <FormControl w={['full', 'xs']} isRequired>
-                                    <FormLabel>PAN Number</FormLabel>
+                                <FormControl w={['full', '56']} isRequired>
+                                    <FormLabel fontSize={12}>PAN Number</FormLabel>
                                     <Input
+                                    fontSize={12}
                                         name='panNum' bg={'white'}
                                         placeholder={'Enter PAN Number'}
                                         maxLength={10}
@@ -242,17 +251,19 @@ const Index = () => {
                                 py={4} spacing={4}
                                 direction={['column', 'row']}
                             >
-                                <FormControl w={['full', 'xs']} isRequired>
-                                    <FormLabel>GST Number</FormLabel>
+                                <FormControl w={['full', '56']} isRequired>
+                                    <FormLabel fontSize={12}>GST Number</FormLabel>
                                     <Input
+                                    fontSize={12}
                                         name='gst' bg={'white'}
                                         placeholder={'Enter GST Number'}
                                         onChange={Formik.handleChange}
                                     />
                                 </FormControl>
-                                <FormControl w={['full', 'xs']} isRequired>
-                                    <FormLabel>Referral Code</FormLabel>
+                                <FormControl w={['full', '56']} isRequired>
+                                    <FormLabel fontSize={12}>Referral Code</FormLabel>
                                     <Input
+                                    fontSize={12}
                                         bg={'white'}
                                         name={'referralCode'}
                                         onChange={Formik.handleChange}
@@ -270,8 +281,9 @@ const Index = () => {
                             <Box py={4}>
                                 <FormControl isRequired>
                                     <HStack justifyContent={'space-between'}>
-                                        <FormLabel>Is user active?</FormLabel>
+                                        <FormLabel fontSize={12}>Is user active?</FormLabel>
                                         <input type="hidden" name='isActive' value={Formik.values.isActive} />
+                                        fontSize={12}
                                         <Switch
                                             defaultChecked={true}
                                             onChange={(e) => { Formik.setFieldValue('isActive', e.target.checked ? "1" : "0") }}
@@ -302,15 +314,16 @@ const Index = () => {
                                 <Box p={4}>
                                     <VStack spacing={6}>
                                         <FormControl w={['full']} isRequired>
-                                            <FormLabel>Capping Amount</FormLabel>
+                                            <FormLabel fontSize={12}>Capping Amount</FormLabel>
                                             <Input
+                                            fontSize={12}
                                                 type={'number'} bg={'white'}
                                                 name={'capAmount'} placeholder={'Enter Amount'}
                                                 onChange={Formik.handleChange}
                                             />
                                         </FormControl>
                                         <FormControl w={['full']} isRequired>
-                                            <FormLabel>Email Verified</FormLabel>
+                                            <FormLabel fontSize={12}>Email Verified</FormLabel>
                                             <RadioGroup
                                                 name={'emailVerified'}
                                                 onChange={Formik.handleChange}
@@ -322,7 +335,7 @@ const Index = () => {
                                             </RadioGroup>
                                         </FormControl>
                                         <FormControl w={['full']} isRequired>
-                                            <FormLabel>Mobile Verified</FormLabel>
+                                            <FormLabel fontSize={12}>Mobile Verified</FormLabel>
                                             <RadioGroup
                                                 name={'phoneVerified'}
                                                 onChange={Formik.handleChange}
@@ -353,23 +366,25 @@ const Index = () => {
                                 <Box p={4}>
                                     <VStack spacing={6}>
                                         <FormControl w={['full']} isRequired>
-                                            <FormLabel>Street Address</FormLabel>
+                                            <FormLabel fontSize={12}>Street Address</FormLabel>
                                             <Input
+                                            fontSize={12}
                                                 bg={'white'}
                                                 name={'line'} placeholder={'Enter here'}
                                                 onChange={Formik.handleChange}
                                             />
                                         </FormControl>
                                         <FormControl w={['full']} isRequired>
-                                            <FormLabel>City</FormLabel>
+                                            <FormLabel fontSize={12}>City</FormLabel>
                                             <Input
+                                            fontSize={12}
                                                 bg={'white'}
                                                 name={'city'} placeholder={'Enter City'}
                                                 onChange={Formik.handleChange}
                                             />
                                         </FormControl>
                                         <FormControl w={['full']} isRequired>
-                                            <FormLabel>State</FormLabel>
+                                            <FormLabel fontSize={12}>State</FormLabel>
                                             <Select name='state'
                                                 placeholder='Select here'
                                                 onChange={Formik.handleChange}
@@ -379,8 +394,9 @@ const Index = () => {
                                             </Select>
                                         </FormControl>
                                         <FormControl w={['full']} isRequired>
-                                            <FormLabel>Pincode</FormLabel>
+                                            <FormLabel fontSize={12}>Pincode</FormLabel>
                                             <Input
+                                            fontSize={12}
                                                 type={'number'} maxLength={6}
                                                 placeholder={'Enter Pincode'}
                                                 name={'pincode'} onChange={Formik.handleChange}
@@ -415,6 +431,7 @@ const Index = () => {
                                     >Choose Profile Pic</Text>
                                 </FormLabel>
                                 <Input
+                                fontSize={12}
                                     type={'file'}
                                     name={'profilePic'}
                                     id={'profilePic'}
@@ -444,6 +461,7 @@ const Index = () => {
                                     >Upload Aadhaar Front</Text>
                                 </FormLabel>
                                 <Input
+                                fontSize={12}
                                     type={'file'}
                                     name={'aadhaarFront'}
                                     id={'aadhaarFront'}
@@ -473,6 +491,7 @@ const Index = () => {
                                     >Upload Aadhaar Back</Text>
                                 </FormLabel>
                                 <Input
+                                fontSize={12}
                                     type={'file'}
                                     name={'aadhaarBack'}
                                     id={'aadhaarBack'}
@@ -502,6 +521,7 @@ const Index = () => {
                                     >Upload PAN Card</Text>
                                 </FormLabel>
                                 <Input
+                                fontSize={12}
                                     type={'file'}
                                     name={'pan'}
                                     id={'pan'}

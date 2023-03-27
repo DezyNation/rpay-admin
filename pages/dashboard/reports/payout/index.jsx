@@ -25,9 +25,6 @@ const Index = () => {
   const [rowData, setRowData] = useState([])
   const [colDefs, setColDefs] = useState([
     {
-      headerName: "#",
-    },
-    {
       headerName: "Payout ID",
       field: "payout_id",
     },

@@ -27,7 +27,8 @@ import {
   BsPower,
   BsSpeedometer,
   BsBriefcaseFill,
-  BsCoin
+  BsCoin,
+  BsPercent
 } from 'react-icons/bs'
 import {
   FaUser,
@@ -53,6 +54,7 @@ import { useRouter } from 'next/router'
 import Link from 'next/link'
 import axios from 'axios'
 import { AbilityBuilder, Abilities } from '@casl/ability'
+import { BiChevronRight } from 'react-icons/bi'
 
 const menuOptions = [
   {
@@ -78,6 +80,23 @@ const menuOptions = [
     name: "dashboard",
     link: "/dashboard?pageid=dashboard",
     icon: <BsSpeedometer />
+  },
+  {
+    type: "accordion",
+    name: "commission",
+    icon: <BsPercent />,
+    children: [
+      {
+        title: "create package",
+        link: "/dashboard/commission-package/create-package?pageid=commission",
+        status: true,
+      },
+      {
+        title: "commission setup",
+        link: "/dashboard/commission-package/commission-setup?pageid=commission",
+        status: true,
+      },
+    ]
   },
   {
     type: "accordion",
@@ -177,9 +196,7 @@ const Layout = (props) => {
   const [firmName, setFirmName] = useState("")
   const [userName, setUserName] = useState("NA")
   const [userType, setUserType] = useState("NA")
-  const { can, build } = new AbilityBuilder(Abilities)
-
-  const [permissions, setPermissions] = useState([])
+  const [isSidebarVisible, setIsSidebarVisible] = useState(true)
 
   useEffect(() => {
     const activePage = typeof window !== 'undefined' ? document.getElementById(pageid) : document.getElementById("dashboard")
@@ -227,98 +244,108 @@ const Layout = (props) => {
       <HStack spacing={0} alignItems={'flex-start'}>
         {/* Sidebar */}
         <Show above='md'>
-          <VStack
-            flex={2}
-            bg={'white'}
-            h={'100vh'}
-            overflowY={'scroll'}
-          >
-            <VStack py={8}>
-              <Image src='https://xsgames.co/randomusers/assets/avatars/male/8.jpg' boxSize={24} rounded={'full'} />
-              <Text fontSize={'xl'} color={'#444'} textTransform={'capitalize'}>{userName}</Text>
-              <Text fontSize={'sm'} color={'#666'} textTransform={'capitalize'}>{firmName} - {userType}</Text>
-            </VStack>
-            <VStack spacing={2} w={'full'}>
-              {
-                menuOptions.map((item, key) => {
-                  if (item.type == "link")
-                    return (
-                      <Link
-                        href={item.link} key={key}
-                        style={{ width: '100%' }}
-                        id={item.name}
-                      >
-                        <HStack
-                          px={4} py={2} spacing={3}
-                          w={'full'} _hover={{ bg: 'aqua' }}
+          {
+            isSidebarVisible &&
+            <VStack
+              position={'relative'}
+              flex={2}
+              bg={'white'}
+              h={'100vh'}
+              overflowY={'scroll'}
+              overflowX={'visible'}
+            >
+              <VStack py={8}>
+                <Image src='https://xsgames.co/randomusers/assets/avatars/male/8.jpg' boxSize={24} rounded={'full'} />
+                <Text fontSize={'xl'} color={'#444'} textTransform={'capitalize'}>{userName}</Text>
+                <Text fontSize={'sm'} color={'#666'} textTransform={'capitalize'}>{firmName} - {userType}</Text>
+              </VStack>
+              <VStack spacing={2} w={'full'}>
+                {
+                  menuOptions.map((item, key) => {
+                    if (item.type == "link")
+                      return (
+                        <Link
+                          href={item.link} key={key}
+                          style={{ width: '100%' }}
+                          id={item.name}
                         >
-                          {item.icon}
-                          <Text fontWeight={600} textTransform={'capitalize'}>{item.name}</Text>
-                        </HStack>
-                      </Link>
-                    )
+                          <HStack
+                            px={4} py={2} spacing={3}
+                            w={'full'} _hover={{ bg: 'aqua' }}
+                          >
+                            {item.icon}
+                            <Text fontWeight={600} textTransform={'capitalize'}>{item.name}</Text>
+                          </HStack>
+                        </Link>
+                      )
 
-                  if (item.type == "accordion")
-                    return (
-                      <Accordion w={'full'} mb={2} allowToggle>
+                    if (item.type == "accordion")
+                      return (
+                        <Accordion w={'full'} mb={2} allowToggle>
 
-                        <AccordionItem>
-                          <AccordionButton>
-                            <HStack spacing={3} textAlign='left' w={'full'} alignItems={'center'}>
-                              {item.icon}
-                              <Text textTransform={'capitalize'} fontSize={'md'} fontWeight={'semibold'}>{item.name}</Text>
-                            </HStack>
-                            <AccordionIcon />
-                          </AccordionButton>
-                          <AccordionPanel pb={4}>
-                            {
-                              item.children.map((child, key) => {
-                                if (child.status) {
-                                  return (
-                                    <Link href={child.link} style={{ width: "100%" }}>
-                                      <Text
-                                        fontSize={'md'}
-                                        textTransform={'capitalize'}
-                                        p={2}
-                                      >
-                                        {child.title}
-                                      </Text>
-                                    </Link>
-                                  )
-                                }
-                              })
-                            }
-                          </AccordionPanel>
-                        </AccordionItem>
+                          <AccordionItem>
+                            <AccordionButton>
+                              <HStack spacing={3} textAlign='left' w={'full'} alignItems={'center'}>
+                                {item.icon}
+                                <Text textTransform={'capitalize'} fontSize={'md'} fontWeight={'semibold'}>{item.name}</Text>
+                              </HStack>
+                              <AccordionIcon />
+                            </AccordionButton>
+                            <AccordionPanel pb={4}>
+                              {
+                                item.children.map((child, key) => {
+                                  if (child.status) {
+                                    return (
+                                      <Link href={child.link} style={{ width: "100%" }}>
+                                        <Text
+                                          fontSize={'md'}
+                                          textTransform={'capitalize'}
+                                          p={2}
+                                        >
+                                          {child.title}
+                                        </Text>
+                                      </Link>
+                                    )
+                                  }
+                                })
+                              }
+                            </AccordionPanel>
+                          </AccordionItem>
 
-                      </Accordion>
-                    )
+                        </Accordion>
+                      )
 
-                })
-              }
+                  })
+                }
+              </VStack>
+              <Box w={'full'} p={4} pt={8}>
+                <Button
+                  w={'full'} iconSpacing={4}
+                  leftIcon={<BsPower />}
+                  bg={'tomato'} boxShadow={'md'}
+                  justifyContent={'flex-start'}
+                  rounded={24} colorScheme={'red'}
+                  onClick={() => logout()}
+                >
+                  Log Out
+                </Button>
+              </Box>
             </VStack>
-            <Box w={'full'} p={4} pt={8}>
-              <Button
-                w={'full'} iconSpacing={4}
-                leftIcon={<BsPower />}
-                bg={'tomato'} boxShadow={'md'}
-                justifyContent={'flex-start'}
-                rounded={24} colorScheme={'red'}
-                onClick={() => logout()}
-              >
-                Log Out
-              </Button>
-            </Box>
-          </VStack>
+          }
         </Show>
         <Box flex={9} h={'100vh'} overflowY={'scroll'}>
           <Stack
             p={3} bg={'blue.50'} spacing={4}
             boxShadow={'md'} direction={['column', 'row']}
             justifyContent={['center', 'space-between']}>
-            <HStack justifyContent={'space-between'}>
+            <HStack w={'full'} justifyContent={'space-between'}>
               <Show below='md'>
                 <Button variant={'unstyled'} onClick={onOpen}>
+                  <HiOutlineMenuAlt1 fontSize={20} />
+                </Button>
+              </Show>
+              <Show above='md'>
+                <Button variant={'unstyled'} onClick={()=>setIsSidebarVisible(!isSidebarVisible)}>
                   <HiOutlineMenuAlt1 fontSize={20} />
                 </Button>
               </Show>

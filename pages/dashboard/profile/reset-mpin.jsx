@@ -52,11 +52,11 @@ const ResetMpin = () => {
     return (
         <>
             <Layout pageTitle={'Reset MPIN'}>
-                <HStack w={'full'} minH={'100vh'} justifyContent={'center'}>
+                <HStack w={'full'} justifyContent={'center'}>
                     <Box
                         bg={'white'}
                         boxShadow={'md'}
-                        p={6} w={['full', 'md']}
+                        p={6} w={['full', 'sm']}
                         rounded={16}
                         display={'flex'}
                         flexDirection={'column'}
@@ -64,11 +64,11 @@ const ResetMpin = () => {
                         alignItems={'center'}
                     >
                         <Text fontSize={'lg'} mb={12}>Reset Your MPIN</Text>
-                        <VStack spacing={8}>
+                        <VStack spacing={6}>
                             <FormControl>
-                                <FormLabel textAlign={'center'}>Enter Old MPIN</FormLabel>
+                                <FormLabel textAlign={'center'} fontSize={12}>Enter Old MPIN</FormLabel>
                                 <HStack spacing={6} justifyContent={'center'}>
-                                    <PinInput otp onChange={(value) => MpinFormik.setFieldValue('old_mpin', value)}>
+                                    <PinInput size={'sm'} otp onChange={(value) => MpinFormik.setFieldValue('old_mpin', value)}>
                                         <PinInputField bg={'aqua'} />
                                         <PinInputField bg={'aqua'} />
                                         <PinInputField bg={'aqua'} />
@@ -77,9 +77,9 @@ const ResetMpin = () => {
                                 </HStack>
                             </FormControl>
                             <FormControl >
-                                <FormLabel textAlign={'center'}>Enter New MPIN</FormLabel>
+                                <FormLabel textAlign={'center'} fontSize={12}>Enter New MPIN</FormLabel>
                                 <HStack spacing={6} justifyContent={'center'}>
-                                    <PinInput otp mask onChange={(value) => MpinFormik.setFieldValue('new_mpin', value)}>
+                                    <PinInput size={'sm'} otp mask onChange={(value) => MpinFormik.setFieldValue('new_mpin', value)}>
                                         <PinInputField bg={'aqua'} />
                                         <PinInputField bg={'aqua'} />
                                         <PinInputField bg={'aqua'} />
@@ -88,9 +88,9 @@ const ResetMpin = () => {
                                 </HStack>
                             </FormControl>
                             <FormControl >
-                                <FormLabel textAlign={'center'}>Verify New MPIN</FormLabel>
+                                <FormLabel textAlign={'center'} fontSize={12}>Verify New MPIN</FormLabel>
                                 <HStack spacing={6} justifyContent={'center'}>
-                                    <PinInput otp onChange={(value) => MpinFormik.setFieldValue('new_mpin_confirmation', value)}>
+                                    <PinInput size={'sm'} otp onChange={(value) => MpinFormik.setFieldValue('new_mpin_confirmation', value)}>
                                         <PinInputField bg={'aqua'} />
                                         <PinInputField bg={'aqua'} />
                                         <PinInputField bg={'aqua'} />

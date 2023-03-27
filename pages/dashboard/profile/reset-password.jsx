@@ -55,7 +55,7 @@ const ResetPassword = () => {
         <Box
           bg={'white'}
           boxShadow={'md'}
-          p={6} w={['full', 'md']}
+          p={4} w={['full', 'sm']}
           rounded={16} mx={'auto'}
           display={'flex'}
           flexDirection={'column'}
@@ -65,24 +65,30 @@ const ResetPassword = () => {
           <Text fontSize={'lg'} mb={12}>Reset Your Password</Text>
           <VStack spacing={8}>
             <FormControl>
-              <FormLabel textAlign={'center'}>Enter Old Passwod</FormLabel>
+              <FormLabel textAlign={'center'} fontSize={12}>Enter Old Passwod</FormLabel>
               <Input
                 name={'old_password'}
+                placeholder={'Enter Old Passwod'}
                 onChange={PasswordFormik.handleChange}
+                bg={'aqua'}
               />
             </FormControl>
             <FormControl >
-              <FormLabel textAlign={'center'}>Enter New Password</FormLabel>
+              <FormLabel textAlign={'center'} fontSize={12}>Enter New Password</FormLabel>
               <Input
                 name={'new_password'} type={'password'}
+                placeholder={'Enter New Password'}
                 onChange={PasswordFormik.handleChange}
+                bg={'aqua'}
               />
             </FormControl>
             <FormControl >
-              <FormLabel textAlign={'center'}>Confirm New Password</FormLabel>
+              <FormLabel textAlign={'center'} fontSize={12}>Confirm New Password</FormLabel>
               <Input
                 name={'new_password_confirmation'}
+                placeholder={'Confirm New Password'}
                 onChange={PasswordFormik.handleChange}
+                bg={'aqua'}
               />
             </FormControl>
             <Button colorScheme={'twitter'} onClick={handlePasswordReset}>Done</Button>
