@@ -119,19 +119,20 @@ const CreateAdmin = () => {
         role: "",
         permissions: []
       })
+      
       setFetchedUser({
         ...fetchedUser,
-        user_name: res.data.data.first_name + " " + res.data.data.last_name,
-        firm_name: res.data.data.firm_name,
-        phone: res.data.data.phone_number,
-        wallet: res.data.data.wallet,
-        role: res.data.data.roles[0].name,
-        permissions: res.data.data.permissions.map(permission => { return permission.name })
+        user_name: res.data.data[0].first_name + " " + res.data.data.last_name,
+        firm_name: res.data.data[0].firm_name,
+        phone: res.data.data[0].phone_number,
+        wallet: res.data.data[0].wallet,
+        role: res.data.data[0].roles[0].name,
+        permissions: res.data.data[0].permissions.map(permission => { return permission.name })
       })
     }).catch((err) => {
       Toast({
         status: 'error',
-        description: err.response.data.message || err.message
+        description: err.message
       })
       setFetchedUser({
         ...fetchedUser,

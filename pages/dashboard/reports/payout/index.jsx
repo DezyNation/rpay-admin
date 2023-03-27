@@ -47,6 +47,11 @@ const Index = () => {
     {
       headerName: "Status",
       field: "status",
+      editable: true,
+      cellEditor: 'agGridSelectEditor',
+      cellEditorParams: {
+        values: ['processing', 'processed', 'reversed']
+      }
     },
     {
       headerName: "Created By User",
@@ -57,6 +62,18 @@ const Index = () => {
       field: "created_at",
     },
   ])
+
+  function onColumnMoved(params) {
+    var columnState = JSON.stringify(params.columnApi.getColumnState());
+    localStorage.setItem('payout_reportsColumns', columnState);
+  }
+
+  function onGridReady(params) {
+    var columnState = JSON.parse(localStorage.getItem('payout_reportsColumns'));
+    if (columnState) {
+      params.columnApi.applyColumnState({state: columnState, applyOrder: true});
+    }
+  }
 
   useEffect(() => {
     BackendAxios.post('/api/admin/razorpay/fetch-payout').then((res) => {
@@ -83,8 +100,11 @@ const Index = () => {
             columnDefs={colDefs}
             defaultColDef={{
               filter: true,
-              floatingFilter: true
+              floatingFilter: true,
+              resizable: true,
             }}
+            onColumnMoved={onColumnMoved}
+            onGridReady={onGridReady}
           >
           </AgGridReact>
         </Box>

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useEffect, useState } from 'react'
 import Layout from '../layout'
 import {
     Box,
@@ -6,7 +6,9 @@ import {
     HStack,
     Button,
     FormControl,
+    FormLabel,
     Input,
+    Select,
     TableContainer,
     Table,
     Thead,
@@ -22,31 +24,102 @@ import {
     ModalBody,
     ModalFooter,
     ModalCloseButton,
-    useDisclosure,
+    Stack,
+    useToast,
 } from '@chakra-ui/react'
-import { useState } from 'react'
-import { GridApi } from 'ag-grid-community'
 import { AgGridReact } from 'ag-grid-react'
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
-import { useEffect } from 'react'
 import CommissionStructure from '@/lib/commission-structure/CommissionStructure'
 import { BsTrash } from 'react-icons/bs'
-import SearchBox from '@/HOC/SearchBox'
+import { useFormik } from 'formik'
+import BackendAxios from '@/lib/utils/axios'
+import { Grid, _ } from "gridjs-react";
+import "gridjs/dist/theme/mermaid.css";
 
 
 const CommissionSetup = () => {
     const [packageSearchQuery, setPackageSearchQuery] = useState("")
-    const [operatorSearchQuery, setOperatorSearchQuery] = useState("")
+    const Toast = useToast({
+        position: 'top-right'
+    })
     const [modalStatus, setModalStatus] = useState(false)
     const [modalTitle, setModalTitle] = useState("")
     const [gridObject, setGridObject] = useState({})
+    const [allPackages, setAllPackages] = useState([])
+    const [selectedPackage, setSelectedPackage] = useState("")
+    const [pagination, setPagination] = useState({
+        current_page: "1",
+        total_pages: "1"
+    })
 
+    const Formik = useFormik({
+        initialValues: {
+            package_name: "",
+            is_default: "0",
+            is_active: "0",
+        },
+        onSubmit: values => {
+            if (!values.package_name) {
+                return Toast({
+                    description: 'Package name can not be empty'
+                })
+            }
+            BackendAxios.post('/api/admin/create-package', values).then(() => {
+                fetchAllPackages()
+                Toast({
+                    status: 'success',
+                    description: 'Package Created'
+                })
+            }).catch(err => {
+                Toast({
+                    status: 'error',
+                    description: err.message
+                })
+            })
+        }
+    })
+
+    function fetchAllPackages() {
+        BackendAxios.get('/api/admin/packages').then(res => {
+            setPagination({
+                current_page: res.data.current_page,
+                total_pages: parseInt(res.data.last_page),
+            })
+            setAllPackages(res.data.data)
+        }).catch(err => {
+            Toast({
+                status: 'error',
+                description: `Error while fetching packages`
+            })
+        })
+    }
+
+    function onCellValueChange(params) {
+        if (params.data.from && params.data.to && params.data.commission) {
+            BackendAxios.post(`/api/admin/update-commission/`, { ...params.data, package_id: selectedPackage }).then(() => {
+                Toast({
+                    status: 'success',
+                    description: `Commission Updated`
+                })
+            }).catch(err => {
+                Toast({
+                    status: 'error',
+                    description: `Error while updating commission`
+                })
+            })
+            console.log({ ...params.data, package_id: selectedPackage })
+        }
+    }
 
     const SwitchCellRender = (params) => {
-        console.log(params)
         return (
-            <Switch> {params.value}</Switch>
+            <Switch
+                defaultChecked={params.value === "1"}
+                onChange={() => {
+                    params.node.setDataValue("is_flat", params.value == "1" ? "0" : "1")
+                }}
+            ></Switch>
         )
     }
 
@@ -58,6 +131,7 @@ const CommissionSetup = () => {
                     size={'xs'}
                     colorScheme={'whatsapp'}
                     fontSize={'sm'}
+                    onClick={() => params.api.applyTransaction({ add: [{is_flat: "1"}] })}
                 >
                     +
                 </Button>
@@ -65,6 +139,7 @@ const CommissionSetup = () => {
                     rounded={'full'}
                     size={'xs'}
                     colorScheme={'red'}
+                    onClick={() => params.api.applyTransaction({ remove: params.api.getSelectedRows() })}
                 >
                     <BsTrash />
                 </Button>
@@ -86,7 +161,8 @@ const CommissionSetup = () => {
 
 
 
-    function handleModal(keyword) {
+    function handleModal(keyword, packageId) {
+        setSelectedPackage(packageId)
         const structure = CommissionStructure.find((item) => {
             if (item.id == keyword) {
                 setModalTitle(item.title)
@@ -106,31 +182,73 @@ const CommissionSetup = () => {
     const defaultColDef = useMemo(() => {
         return {
             resizable: true,
-            singleClickEditable: true,
+            editable: true,
+            singleClickEdit: true,
             filter: true,
             floatingFilter: true,
         };
     }, []);
 
+    useEffect(() => {
+        fetchAllPackages()
+    }, [])
+
+
+
 
     return (
         <>
             <Layout pageTitle={'Define Commission Rate'}>
-                <SearchBox searchTitle={'Find Commission Package'}>
-                    <HStack>
+                <Box p={3} bg={'twitter.500'} color={'white'}>
+                    <Text>Create New Commission Package</Text>
+                </Box>
+                <Stack
+                    spacing={6} my={6}
+                    direction={['column', 'row']}
+                >
+                    <FormControl w={'xs'}>
+                        <FormLabel>Package Name</FormLabel>
+                        <Input
+                            name={'package_name'} bg={'white'}
+                            placeholder={'Enter package name'}
+                            onChange={Formik.handleChange}
+                        />
+                    </FormControl>
+                    <FormControl w={'xs'}>
+                        <FormLabel>Is Default</FormLabel>
+                        <Select name='is_default' onChange={Formik.handleChange}>
+                            <option value="0" selected>No</option>
+                            <option value="1">Yes</option>
+                        </Select>
+                    </FormControl>
+                    <FormControl w={'xs'}>
+                        <FormLabel>Is Active</FormLabel>
+                        <Select name='is_active' onChange={Formik.handleChange}>
+                            <option value="0" selected>No</option>
+                            <option value="1">Yes</option>
+                        </Select>
+                    </FormControl>
+                </Stack>
+
+                <HStack justifyContent={'flex-end'} mb={8}>
+                    <Button colorScheme={'twitter'} onClick={Formik.handleSubmit}>Create</Button>
+                </HStack>
+
+                <Box mt={'28'}>
+                    <Text color={'#555'}>Commission Setup For Existing Packages</Text>
+                    <HStack mt={6} mb={2}>
                         <Input
                             value={packageSearchQuery}
-                            bg={'white'}
+                            bg={'white'} w={['full', 'xs']}
                             onChange={(e) => setPackageSearchQuery(e.target.value)}
                             placeholder={'Enter commission package name to search'}
                         />
                         <Button onClick={searchPackage} colorScheme={'twitter'}>Search</Button>
                     </HStack>
-                </SearchBox>
 
-                <Box my={6}>
-                    <Text>Set commission for your packages</Text>
-
+                    <HStack spacing={2} mt={8} justifyContent={'center'}>
+                        <Button colorScheme={'twitter'} fontSize={12} size={'xs'} variant={'solid'}>1</Button>
+                    </HStack>
                     <TableContainer>
                         <Table>
                             <Thead>
@@ -141,496 +259,46 @@ const CommissionSetup = () => {
                                     <Th>Total Users</Th>
                                     <Th>Default</Th>
                                     <Th>Status</Th>
-                                    <Th>Operator Commission</Th>
-                                    <Th>AePS</Th>
-                                    <Th>AePS Mini Statement</Th>
-                                    <Th>AePS Aadhaar Pay</Th>
                                     <Th>Payout</Th>
-                                    <Th>DMT</Th>
-                                    <Th>MATM</Th>
-                                    <Th>CMS</Th>
-                                    <Th>LIC</Th>
-                                    <Th>PAN</Th>
                                     <Th>Deposit Fees</Th>
                                 </Tr>
                             </Thead>
                             <Tbody>
-                                <Tr>
-                                    <Td>1</Td>
-                                    {/* Name of person who created these packages */}
-                                    <Td>Admin</Td>
-                                    <Td>Plan A</Td>
-                                    <Td>0</Td>
-                                    <Td><Switch></Switch></Td>
-                                    <Td><Switch></Switch></Td>
-                                    <Td>
-                                        {/* Operator-wise Commission */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("1")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* AePS Withdrawal */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("2")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* AePS Mini Statement */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("11")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* AePS Aadhaar Pay */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("3")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* Payout */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("4")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* DMT */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("5")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* MATM */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("6")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* CMS */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("8")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* LIC */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("9")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* PAN */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("10")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* Money Deposit */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("7")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                </Tr>
-                                <Tr>
-                                    <Td>2</Td>
-                                    {/* Name of person who created these packages */}
-                                    <Td>Admin</Td>
-                                    <Td>Plan B</Td>
-                                    <Td>0</Td>
-                                    <Td><Switch></Switch></Td>
-                                    <Td><Switch></Switch></Td>
-                                    <Td>
-                                        {/* Operator-wise Commission */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("1")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* AePS Withdrawal */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("2")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* AePS Mini Statement */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("11")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* AePS Aadhaar Pay */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("3")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* Payout */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("4")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* DMT */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("5")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* MATM */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("6")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* CMS */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("8")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* LIC */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("9")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* PAN */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("10")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* Money Deposit */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("7")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                </Tr>
-                                <Tr>
-                                    <Td>3</Td>
-                                    {/* Name of person who created these packages */}
-                                    <Td>Admin</Td>
-                                    <Td>Plan C</Td>
-                                    <Td>0</Td>
-                                    <Td><Switch></Switch></Td>
-                                    <Td><Switch></Switch></Td>
-                                    <Td>
-                                        {/* Operator-wise Commission */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("1")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* AePS Withdrawal */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("2")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* AePS Mini Statement */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("11")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* AePS Aadhaar Pay */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("3")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* Payout */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("4")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* DMT */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("5")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* MATM */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("6")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* CMS */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("8")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* LIC */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("9")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* PAN */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("10")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* Money Deposit */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("7")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                </Tr>
-                                <Tr>
-                                    <Td>4</Td>
-                                    {/* Name of person who created these packages */}
-                                    <Td>Admin</Td>
-                                    <Td>Whitelabel</Td>
-                                    <Td>0</Td>
-                                    <Td><Switch></Switch></Td>
-                                    <Td><Switch></Switch></Td>
-                                    <Td>
-                                        {/* Operator-wise Commission */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("1")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* AePS Withdrawal */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("2")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* AePS Mini Statement */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("11")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* AePS Aadhaar Pay */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("3")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* Payout */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("4")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* DMT */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("5")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* MATM */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("6")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* CMS */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("8")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* LIC */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("9")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* PAN */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("10")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                    <Td>
-                                        {/* Money Deposit */}
-                                        <Button
-                                            size={'sm'}
-                                            colorScheme={'blue'}
-                                            onClick={() => handleModal("7")}
-                                        >
-                                            Set Commission
-                                        </Button>
-                                    </Td>
-                                </Tr>
+                                {
+                                    allPackages.map((item, key) => {
+                                        return (
+                                            <Tr key={key}>
+                                                <Td>{key + 1}</Td>
+                                                {/* Name of person who created these packages */}
+                                                <Td>{item.user_id}</Td>
+                                                <Td>{item.name}</Td>
+                                                <Td>0</Td>
+                                                <Td><Switch defaultChecked={item.is_default === 1}></Switch></Td>
+                                                <Td><Switch defaultChecked={item.is_active === 1}></Switch></Td>
+                                                <Td>
+                                                    {/* Payout */}
+                                                    <Button
+                                                        size={'sm'}
+                                                        colorScheme={'blue'}
+                                                        onClick={() => handleModal("4", item.id)}
+                                                    >
+                                                        Set Commission
+                                                    </Button>
+                                                </Td>
+                                                <Td>
+                                                    {/* Money Deposit */}
+                                                    <Button
+                                                        size={'sm'}
+                                                        colorScheme={'blue'}
+                                                        onClick={() => handleModal("7", item.id)}
+                                                    >
+                                                        Set Commission
+                                                    </Button>
+                                                </Td>
+                                            </Tr>
+                                        )
+                                    })
+                                }
                             </Tbody>
                         </Table>
                     </TableContainer>
@@ -661,6 +329,8 @@ const CommissionSetup = () => {
                                     'switchCellRender': SwitchCellRender,
                                     'actionsCellRender': ActionsCellRender,
                                 }}
+                                rowSelection={'single'}
+                                onCellValueChanged={onCellValueChange}
                             >
 
                             </AgGridReact>

@@ -7,6 +7,7 @@ import {
     Stack,
     Button,
     Input,
+    Image,
     Tabs,
     TabList,
     Tab,
@@ -32,15 +33,12 @@ import {
     DrawerOverlay,
     DrawerContent,
     DrawerCloseButton,
-    useDisclosure,
-    Checkbox,
-    CheckboxGroup,
     VisuallyHidden,
     useToast,
 } from '@chakra-ui/react'
 import { SiMicrosoftexcel } from 'react-icons/si'
 import { FaFileCsv, FaFilePdf, FaPrint } from 'react-icons/fa'
-import { BsChevronDown } from 'react-icons/bs'
+import { BsChevronDown, BsFileBarGraphFill, BsPenFill, BsReplyFill } from 'react-icons/bs'
 import Layout from '../../layout';
 import jsPDF from 'jspdf';
 import "jspdf-autotable"
@@ -49,6 +47,7 @@ import CheckboxTree from 'react-checkbox-tree'
 import 'react-checkbox-tree/lib/react-checkbox-tree.css';
 import Script from 'next/script'
 import Link from 'next/link'
+import { BiPen, BiRupee } from 'react-icons/bi'
 
 const ExportPDF = (currentRowData) => {
     const doc = new jsPDF('landscape')
@@ -63,8 +62,6 @@ const ExportPDF = (currentRowData) => {
     ]
 
     doc.autoTable({ html: '#exportableTable' })
-    doc.setCharSpace(4)
-    //This is a key for printing
     doc.output('dataurlnewwindow');
 }
 
@@ -131,13 +128,12 @@ const Index = () => {
     function fetchUsersList() {
         setFetchedUsers([])
         BackendAxios.get(`/api/admin/users-list/${selectedTab}`).then((res) => {
-            console.log(res.data)
             setFetchedUsers(res.data)
         }).catch((err) => {
             console.log(err)
             Toast({
                 status: 'error',
-                description: err.message
+                description: err.response.data.message || err.message
             })
         })
     }
@@ -149,12 +145,12 @@ const Index = () => {
 
     function changeUserStatus(userId, updateTo) {
         BackendAxios.get(`/api/admin/user/status/${userId}/${updateTo}`).then(() => {
-            fetchUsersList
+            fetchUsersList()
         }).catch((err) => {
             console.log(err)
             Toast({
                 status: 'error',
-                description: err.message
+                description: err.response.data.message || err.message
             })
         })
     }
@@ -215,7 +211,7 @@ const Index = () => {
             Toast({
                 status: 'error',
                 title: 'Error Occured',
-                description: err.message
+                description: err.response.data.message || err.message
             })
         })
     }
@@ -292,6 +288,10 @@ const Index = () => {
                                             />
                                         </Stack>
 
+                                        <HStack spacing={2} mt={8}>
+                                            <Text>Pages: </Text>
+                                            <Button colorScheme={'twitter'} fontSize={12} size={'xs'} variant={'solid'}>1</Button>
+                                        </HStack>
                                         {/* Table */}
                                         <TableContainer my={6}>
                                             <Table variant='striped' colorScheme='teal'>
@@ -301,7 +301,9 @@ const Index = () => {
                                                         <Th>KYC Details</Th>
                                                         <Th>Balance Details</Th>
                                                         <Th>Complete Address</Th>
-                                                        <Th>Actions</Th>
+                                                        <Th>PAN Card</Th>
+                                                        <Th>Aadhaar Card</Th>
+                                                        {/* <Th>Actions</Th> */}
                                                     </Tr>
                                                 </Thead>
                                                 <Tbody fontSize={'xs'}>
@@ -309,13 +311,62 @@ const Index = () => {
                                                         fetchedUsers && fetchedUsers.map((user, key) => {
                                                             return (
                                                                 <Tr key={key}>
-                                                                    <Td>
-                                                                        <Box>
-                                                                            {/* <Text textTransform={'capitalize'}>{user.packages[0].name} Plan</Text><br /> */}
-                                                                            <Text>{user.first_name} {user.last_name} </Text>
+                                                                    <Td pos={'relative'}>
+                                                                        <HStack spacing={0} pos={'absolute'} top={0} left={0}>
+                                                                            <Link href={`/dashboard/users/manage-user?pageId=users&userId=${user.id}`}>
+                                                                                <Button
+                                                                                    size={'xs'} rounded={0}
+                                                                                    colorScheme={'twitter'}
+                                                                                    title={'Edit'}
+                                                                                >
+                                                                                    <BsPenFill />
+                                                                                </Button>
+                                                                            </Link>
+                                                                            <Link href={`/dashboard/account/fund-transfer?pageId=transfer&userId=${user.id}`}>
+                                                                                <Button
+                                                                                    size={'xs'} rounded={0}
+                                                                                    colorScheme={'whatsapp'}
+                                                                                    title={'Transfer/Reversal'}
+                                                                                >
+                                                                                    <BiRupee fontSize={18} />
+                                                                                </Button>
+                                                                            </Link>
+                                                                            <Link href={`/dashboard/reports/transactions/user-ledger?pageId=reports&userId=${user.id}`}>
+                                                                                <Button
+                                                                                    size={'xs'} rounded={0}
+                                                                                    colorScheme={'red'}
+                                                                                    title={'Reports'}
+                                                                                >
+                                                                                    <BsFileBarGraphFill />
+                                                                                </Button>
+                                                                            </Link>
+                                                                            <HStack p={1} bg={'white'}>
+                                                                                <Switch
+                                                                                    size={'sm'}
+                                                                                    onChange={() => changeUserStatus(user.id, user.is_active == 1 ? 0 : 1)}
+                                                                                    defaultChecked={user.is_active === 1}
+                                                                                >Active</Switch>
+                                                                            </HStack>
+                                                                        </HStack>
+                                                                        <Box mt={4}>
+                                                                            <HStack spacing={4} pb={4}>
+                                                                                <a href='#' target={'_blank'}>
+                                                                                    <Image
+                                                                                        src={'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'}
+                                                                                        boxSize={'10'} objectFit={'contain'}
+                                                                                    />
+                                                                                </a>
+                                                                                <Box>
+                                                                                    <Text><b>ID: </b>{user.id}</Text>
+                                                                                    <Text>{user.first_name} {user.last_name} </Text>
+                                                                                    <Text>
+                                                                                        <a href={`tel:${user.phone_number}`}><b>MOB: </b>{user.phone_number}</a>
+                                                                                    </Text>
+                                                                                </Box>
+                                                                            </HStack>
+                                                                            <Text textTransform={'capitalize'}>{"Package0"} Plan</Text>
                                                                             <Text>{user.email}</Text>
                                                                             <Text>
-                                                                                <a href={`tel:${user.phone_number}`}>{user.phone_number}</a>,
                                                                                 <a href={`tel:${user.alternate_phone}`}>{user.alternate_phone}</a>
                                                                             </Text>
                                                                             <Text>{user.gender} &nbsp;&nbsp;{user.dob}</Text><br />
@@ -345,6 +396,32 @@ const Index = () => {
                                                                         </Box>
                                                                     </Td>
                                                                     <Td>
+                                                                        {/* PAN Card */}
+                                                                        <a href='#' target={'_blank'}>
+                                                                            <Image
+                                                                                src={'https://picsum.photos/200/120'}
+                                                                                boxSize={'16'} objectFit={'contain'}
+                                                                            />
+                                                                        </a>
+                                                                    </Td>
+                                                                    <Td>
+                                                                        {/* Aadhaar Front */}
+                                                                        <a href={`${process.env.NEXT_PUBLIC_BACKEND_URL}/${user.aadhar_front}` || '#'} target={'_blank'}>
+                                                                            <Image
+                                                                                src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/${user.aadhar_front}` || 'https://picsum.photos/200/120'}
+                                                                                boxSize={'16'} objectFit={'contain'}
+                                                                            />
+                                                                        </a>
+                                                                        <br />
+                                                                        {/* Aadhaar Back */}
+                                                                        <a href='#' target={'_blank'}>
+                                                                            <Image
+                                                                                src={'https://picsum.photos/200/120'}
+                                                                                boxSize={'16'} objectFit={'contain'}
+                                                                            />
+                                                                        </a>
+                                                                    </Td>
+                                                                    {/* <Td>
                                                                         <VStack gap={4}>
                                                                             <Switch
                                                                                 size={'sm'}
@@ -365,10 +442,10 @@ const Index = () => {
                                                                                         <Box>
                                                                                             <VStack alignItems={'flex-start'} spacing={0}>
                                                                                                 <Text w={'full'} pb={1} borderBottom={'1px solid #999'}>Actions</Text>
-                                                                                                <Link href={'/dashboard/account/fund-transfer?pageId=transfer'}>
+                                                                                                <Link href={`/dashboard/account/fund-transfer?pageId=transfer&userId=${user.id}`}>
                                                                                                     <Text p={2} w={'full'} fontSize={'sm'} cursor={'pointer'} _hover={{ bg: 'blue.50' }}>Fund Transfer/Reversal</Text>
                                                                                                 </Link>
-                                                                                                {/* <Text p={2} w={'full'} fontSize={'sm'} cursor={'pointer'} _hover={{ bg: 'blue.50' }}>Scheme</Text> */}
+                                                                                                <Text p={2} w={'full'} fontSize={'sm'} cursor={'pointer'} _hover={{ bg: 'blue.50' }}>Scheme</Text>
                                                                                             </VStack>
                                                                                             <Box h={8} w={'full'}></Box>
                                                                                             <VStack alignItems={'flex-start'} spacing={0}>
@@ -382,8 +459,8 @@ const Index = () => {
                                                                                                 >
                                                                                                     Permissions
                                                                                                 </Text>
-                                                                                                {/* <Text p={2} w={'full'} fontSize={'sm'} cursor={'pointer'} _hover={{ bg: 'blue.50' }}>View Profile</Text> */}
-                                                                                                <Link href={'/dashboard/users/manage-user?pageId=users'}>
+                                                                                                <Text p={2} w={'full'} fontSize={'sm'} cursor={'pointer'} _hover={{ bg: 'blue.50' }}>View Profile</Text>
+                                                                                                <Link href={`/dashboard/users/manage-user?pageId=users&userId=${user.id}`}>
                                                                                                     <Text p={2} w={'full'} fontSize={'sm'} cursor={'pointer'} _hover={{ bg: 'blue.50' }}>Edit Profile</Text>
                                                                                                 </Link>
                                                                                             </VStack>
@@ -399,7 +476,7 @@ const Index = () => {
                                                                                 View Report
                                                                             </Button>
                                                                         </VStack>
-                                                                    </Td>
+                                                                    </Td> */}
                                                                 </Tr>
                                                             )
                                                         })
@@ -407,6 +484,10 @@ const Index = () => {
                                                 </Tbody>
                                             </Table>
                                         </TableContainer>
+                                        <HStack spacing={2} mt={2}>
+                                            <Text>Pages: </Text>
+                                            <Button colorScheme={'twitter'} fontSize={12} size={'xs'} variant={'solid'}>1</Button>
+                                        </HStack>
 
                                         {/* Printable Table */}
                                         <VisuallyHidden>
@@ -427,6 +508,7 @@ const Index = () => {
                                                                     <Td>
                                                                         <Box>
                                                                             {/* <Text textTransform={'capitalize'}>{user.packages[0].name} Plan</Text><br /><br /> */}
+                                                                            <Text><b>ID: </b>{user.id}</Text>
                                                                             <Text>{user.first_name} {user.last_name} </Text><br />
                                                                             <Text>{user.email}</Text><br />
                                                                             <Text><br />

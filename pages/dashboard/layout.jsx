@@ -91,11 +91,6 @@ const menuOptions = [
         link: "/dashboard/commission-package/create-package?pageid=commission",
         status: true,
       },
-      {
-        title: "commission setup",
-        link: "/dashboard/commission-package/commission-setup?pageid=commission",
-        status: true,
-      },
     ]
   },
   {
