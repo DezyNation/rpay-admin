@@ -21,8 +21,12 @@ import {
 } from '@chakra-ui/react'
 import Layout from '../../layout'
 import BackendAxios, { FormAxios } from '@/lib/utils/axios'
+import { states } from '@/lib/states'
+import { useRouter } from 'next/router'
 
 const Index = () => {
+    const Router = useRouter()
+    const { user_id } = Router.query
     const Toast = useToast({
         position: 'top-right'
     })
@@ -58,7 +62,7 @@ const Index = () => {
             pan: null,
         },
         onSubmit: (values) => {
-            let userForm = document.getElementById('createUserForm')
+            let userForm = document.getElementById('editUserForm')
             FormAxios.postForm('/admin-update-user', userForm).then((res) => {
                 Toast({
                     status: 'success',
@@ -75,21 +79,22 @@ const Index = () => {
         }
     })
 
-    function searchUser() {
-        BackendAxios.post(`/api/admin/user/info/${Formik.values.userId}`).then((res) => {
+    function searchUser(queryUserId) {
+        BackendAxios.post(`/api/admin/user/info/${queryUserId || Formik.values.userId}`).then((res) => {
             Formik.setFieldValue("firstName", res.data.data.first_name)
             Formik.setFieldValue("lastName", res.data.data.last_name)
             Formik.setFieldValue("userEmail", res.data.data.email)
             Formik.setFieldValue("userPhone", res.data.data.phone_number)
+            Formik.setFieldValue("alternativePhone", res.data.data.alternate_number)
             Formik.setFieldValue("dob", res.data.data.dob)
             Formik.setFieldValue("gender", res.data.data.gender)
             Formik.setFieldValue("firmName", res.data.data.firm_name)
             Formik.setFieldValue("companyType", res.data.data.firm_type)
             Formik.setFieldValue("kycStatus", res.data.data.kyc)
             Formik.setFieldValue("aadhaarNum", res.data.data.aadhaar)
-            Formik.setFieldValue("panNum", res.data.data.pan)
+            Formik.setFieldValue("panNum", res.data.data.pan_number)
             Formik.setFieldValue("isActive", res.data.data.is_active)
-            Formik.setFieldValue("gst", res.data.data.gst)
+            Formik.setFieldValue("gst", res.data.data.gst_number)
             Formik.setFieldValue("capAmount", res.data.data.minimum_balance)
             Formik.setFieldValue("line", res.data.data.line)
             Formik.setFieldValue("city", res.data.data.city)
@@ -98,23 +103,32 @@ const Index = () => {
         }).catch((err) => {
             Toast({
                 status: 'error',
-                description: err.message
+                description: "User not found!"
             })
+            console.log(err)
         })
     }
 
+    useEffect(() => {
+        if (Router.isReady) {
+            searchUser(user_id)
+            Formik.setFieldValue("userId", user_id)
+        }
+    }, [Router.isReady])
+
     return (
         <>
-            <form onSubmit={Formik.handleSubmit} id={'createUserForm'}>
+            <form onSubmit={Formik.handleSubmit} id={'editUserForm'}>
                 <Layout pageTitle={'Edit User'}>
-                    <Text fontWeight={'semibold'} fontSize={'lg'}>Edit</Text>
-
-                    <input type="hidden" name={'userId'} value={Formik.values.userId} />
+                    {/* <input type="hidden" name={'userId'} value={Formik.values.userId} /> */}
                     <FormControl>
                         <FormLabel>Enter User ID to edit details</FormLabel>
                         <HStack>
-                            <Input name='userId' onChange={Formik.handleChange} w={['full', 'sm']} />
-                            <Button onClick={searchUser} colorScheme={'teal'}>Search Details</Button>
+                            <Input
+                                name='userId' onChange={Formik.handleChange}
+                                value={Formik.values.userId} w={['full', 'xs']}
+                            />
+                            <Button onClick={() => searchUser(Formik.values.userId)} colorScheme={'teal'}>Search Details</Button>
                         </HStack>
                     </FormControl>
 
@@ -180,6 +194,7 @@ const Index = () => {
                                     <Input
                                         name='alternatePhone' bg={'white'}
                                         onChange={Formik.handleChange}
+                                        value={Formik.values.alternativePhone}
                                         placeholder={'Alternate Phone Number'}
                                     />
                                 </FormControl>
@@ -420,8 +435,11 @@ const Index = () => {
                                                 onChange={Formik.handleChange}
                                                 value={Formik.values.state}
                                             >
-                                                <option value="Jammu Kashmir">Jammu Kashmir</option>
-                                                <option value="Delhi">Delhi</option>
+                                                {
+                                                    states.map((stateName, key) => {
+                                                        return <option value={stateName} key={key}>{stateName}</option>
+                                                    })
+                                                }
                                             </Select>
                                         </FormControl>
                                         <FormControl w={['full']}>
@@ -454,6 +472,14 @@ const Index = () => {
                                     borderColor={'teal.300'} cursor={'pointer'}
                                     display={'grid'} placeContent={'center'}
                                     htmlFor={'profilePic'}
+                                    backgroundImage={
+                                        Formik.values.profilePic ?
+                                            URL.createObjectURL(Formik.values.profilePic) :
+                                            "#FFFFFFFF"
+                                    }
+                                    backgroundSize={'contain'}
+                                    backgroundRepeat={'no-repeat'}
+                                    backgroundPosition={'center'}
                                 >
                                     <Text
                                         fontSize={'xs'}
@@ -466,12 +492,14 @@ const Index = () => {
                                     name={'profilePic'}
                                     id={'profilePic'}
                                     display={'none'}
-                                    onChange={(e) => Formik.setFieldValue('profilePic', e.currentTarget.files[0])}
+                                    onChange={(e) => {
+                                        Formik.setFieldValue('profilePic', e.currentTarget.files[0])
+                                    }}
                                 />
                                 <Button
                                     colorScheme={'red'}
                                     size={'xs'}
-                                    onClick={(e) => Formik.setFieldValue('profilePic', null)}
+                                    onClick={() => Formik.setFieldValue('profilePic', null)}
                                 >Delete</Button>
                             </FormControl>
                             <FormControl
@@ -483,6 +511,14 @@ const Index = () => {
                                     borderColor={'teal.300'} cursor={'pointer'}
                                     display={'grid'} placeContent={'center'}
                                     htmlFor={'aadhaarFront'}
+                                    backgroundImage={
+                                        Formik.values.aadhaarFront ?
+                                            URL.createObjectURL(Formik.values.aadhaarFront) :
+                                            "#FFFFFFFF"
+                                    }
+                                    backgroundSize={'contain'}
+                                    backgroundRepeat={'no-repeat'}
+                                    backgroundPosition={'center'}
                                 >
                                     <Text
                                         fontSize={'xs'}
@@ -512,6 +548,14 @@ const Index = () => {
                                     borderColor={'teal.300'} cursor={'pointer'}
                                     display={'grid'} placeContent={'center'}
                                     htmlFor={'aadhaarBack'}
+                                    backgroundImage={
+                                        Formik.values.aadhaarBack ?
+                                            URL.createObjectURL(Formik.values.aadhaarBack) :
+                                            "#FFFFFFFF"
+                                    }
+                                    backgroundSize={'contain'}
+                                    backgroundRepeat={'no-repeat'}
+                                    backgroundPosition={'center'}
                                 >
                                     <Text
                                         fontSize={'xs'}
@@ -541,6 +585,14 @@ const Index = () => {
                                     borderColor={'teal.300'} cursor={'pointer'}
                                     display={'grid'} placeContent={'center'}
                                     htmlFor={'pan'}
+                                    backgroundImage={
+                                        Formik.values.pan ?
+                                        URL.createObjectURL(Formik.values.pan):
+                                        "#FFFFFFFF"
+                                    }
+                                    backgroundSize={'contain'}
+                                    backgroundRepeat={'no-repeat'}
+                                    backgroundPosition={'center'}
                                 >
                                     <Text
                                         fontSize={'xs'}

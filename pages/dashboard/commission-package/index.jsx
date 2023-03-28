@@ -31,7 +31,7 @@ import { AgGridReact } from 'ag-grid-react'
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import CommissionStructure from '@/lib/commission-structure/CommissionStructure'
-import { BsTrash } from 'react-icons/bs'
+import { BsChevronDoubleLeft, BsChevronDoubleRight, BsChevronLeft, BsChevronRight, BsTrash } from 'react-icons/bs'
 import { useFormik } from 'formik'
 import BackendAxios from '@/lib/utils/axios'
 import { Grid, _ } from "gridjs-react";
@@ -50,7 +50,11 @@ const CommissionSetup = () => {
     const [selectedPackage, setSelectedPackage] = useState("")
     const [pagination, setPagination] = useState({
         current_page: "1",
-        total_pages: "1"
+        total_pages: "1",
+        first_page_url: "",
+        last_page_url: "",
+        next_page_url: "",
+        prev_page_url: "",
     })
 
     const Formik = useFormik({
@@ -80,17 +84,32 @@ const CommissionSetup = () => {
         }
     })
 
-    function fetchAllPackages() {
-        BackendAxios.get('/api/admin/packages').then(res => {
+    function fetchAllPackages(pageLink) {
+        BackendAxios.get(pageLink || '/api/admin/packages?page=1').then(res => {
             setPagination({
                 current_page: res.data.current_page,
                 total_pages: parseInt(res.data.last_page),
+                first_page_url: res.data.first_page_url,
+                last_page_url: res.data.last_page_url,
+                next_page_url: res.data.next_page_url,
+                prev_page_url: res.data.prev_page_url,
             })
             setAllPackages(res.data.data)
         }).catch(err => {
             Toast({
                 status: 'error',
                 description: `Error while fetching packages`
+            })
+        })
+    }
+    function fetchAllCommission(selectedPackageId){
+        BackendAxios.get(`api/admin/commissions/${selectedPackageId}`).then(res=>{
+            setRowData(res.data)
+            setModalStatus(true)
+        }).catch(err=>{
+            Toast({
+                status: "error",
+                description: "Error while fetching commission"
             })
         })
     }
@@ -115,9 +134,9 @@ const CommissionSetup = () => {
     const SwitchCellRender = (params) => {
         return (
             <Switch
-                defaultChecked={params.value === "1"}
+                defaultChecked={params.value === 1}
                 onChange={() => {
-                    params.node.setDataValue("is_flat", params.value == "1" ? "0" : "1")
+                    params.node.setDataValue("is_flat", params.value == 1 ? 0 : 1)
                 }}
             ></Switch>
         )
@@ -131,7 +150,7 @@ const CommissionSetup = () => {
                     size={'xs'}
                     colorScheme={'whatsapp'}
                     fontSize={'sm'}
-                    onClick={() => params.api.applyTransaction({ add: [{is_flat: "1"}] })}
+                    onClick={() => params.api.applyTransaction({ add: [{ is_flat: 1 }] })}
                 >
                     +
                 </Button>
@@ -166,15 +185,13 @@ const CommissionSetup = () => {
         const structure = CommissionStructure.find((item) => {
             if (item.id == keyword) {
                 setModalTitle(item.title)
-                setModalStatus(true)
                 return item
             }
         })
         if (structure) {
             setGridObject(structure)
             setColumnDefs(structure.columnDefs)
-            setRowData(structure.rowData)
-
+            fetchAllCommission(packageId)
         }
     }
 
@@ -190,7 +207,7 @@ const CommissionSetup = () => {
     }, []);
 
     useEffect(() => {
-        fetchAllPackages()
+        fetchAllPackages('/api/admin/packages?page=1')
     }, [])
 
 
@@ -246,8 +263,40 @@ const CommissionSetup = () => {
                         <Button onClick={searchPackage} colorScheme={'twitter'}>Search</Button>
                     </HStack>
 
-                    <HStack spacing={2} mt={8} justifyContent={'center'}>
-                        <Button colorScheme={'twitter'} fontSize={12} size={'xs'} variant={'solid'}>1</Button>
+                    <HStack spacing={2} mt={12} py={4} bg={'white'} justifyContent={'center'}>
+                        <Button
+                            colorScheme={'twitter'}
+                            fontSize={12} size={'xs'}
+                            variant={'outline'}
+                            onClick={()=>fetchAllPackages(pagination.first_page_url)}
+                        ><BsChevronDoubleLeft />
+                        </Button>
+                        <Button
+                            colorScheme={'twitter'}
+                            fontSize={12} size={'xs'}
+                            variant={'outline'}
+                            onClick={()=>fetchAllPackages(pagination.prev_page_url)}
+                        ><BsChevronLeft />
+                        </Button>
+                        <Button
+                            colorScheme={'twitter'}
+                            fontSize={12} size={'xs'}
+                            variant={'solid'}
+                        >{pagination.current_page}</Button>
+                        <Button
+                            colorScheme={'twitter'}
+                            fontSize={12} size={'xs'}
+                            variant={'outline'}
+                            onClick={()=>fetchAllPackages(pagination.next_page_url)}
+                        ><BsChevronRight />
+                        </Button>
+                        <Button
+                            colorScheme={'twitter'}
+                            fontSize={12} size={'xs'}
+                            variant={'outline'}
+                            onClick={()=>fetchAllPackages(pagination.last_page_url)}
+                        ><BsChevronDoubleRight />
+                        </Button>
                     </HStack>
                     <TableContainer>
                         <Table>
@@ -260,7 +309,6 @@ const CommissionSetup = () => {
                                     <Th>Default</Th>
                                     <Th>Status</Th>
                                     <Th>Payout</Th>
-                                    <Th>Deposit Fees</Th>
                                 </Tr>
                             </Thead>
                             <Tbody>
@@ -285,16 +333,6 @@ const CommissionSetup = () => {
                                                         Set Commission
                                                     </Button>
                                                 </Td>
-                                                <Td>
-                                                    {/* Money Deposit */}
-                                                    <Button
-                                                        size={'sm'}
-                                                        colorScheme={'blue'}
-                                                        onClick={() => handleModal("7", item.id)}
-                                                    >
-                                                        Set Commission
-                                                    </Button>
-                                                </Td>
                                             </Tr>
                                         )
                                     })
@@ -302,6 +340,37 @@ const CommissionSetup = () => {
                             </Tbody>
                         </Table>
                     </TableContainer>
+                    <HStack spacing={2} py={4} bg={'white'} justifyContent={'center'}>
+                        <Button
+                            colorScheme={'twitter'}
+                            fontSize={12} size={'xs'}
+                            variant={'outline'}
+                        ><BsChevronDoubleLeft />
+                        </Button>
+                        <Button
+                            colorScheme={'twitter'}
+                            fontSize={12} size={'xs'}
+                            variant={'outline'}
+                        ><BsChevronLeft />
+                        </Button>
+                        <Button
+                            colorScheme={'twitter'}
+                            fontSize={12} size={'xs'}
+                            variant={'solid'}
+                        >{pagination.current_page}</Button>
+                        <Button
+                            colorScheme={'twitter'}
+                            fontSize={12} size={'xs'}
+                            variant={'outline'}
+                        ><BsChevronRight />
+                        </Button>
+                        <Button
+                            colorScheme={'twitter'}
+                            fontSize={12} size={'xs'}
+                            variant={'outline'}
+                        ><BsChevronDoubleRight />
+                        </Button>
+                    </HStack>
                 </Box>
             </Layout>
 

@@ -32,10 +32,12 @@ import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import BackendAxios from '@/lib/utils/axios'
 import Layout from '../layout';
+import { useRouter } from 'next/router';
 
 const FundTransfer = () => {
     const { isOpen, onOpen, onClose } = useDisclosure()
-
+    const Router = useRouter()
+    const { user_id } = Router.query
     const Toast = useToast({
         position: 'top-right'
     })
@@ -47,7 +49,7 @@ const FundTransfer = () => {
     })
     const TransferFormik = useFormik({
         initialValues: {
-            beneficiaryId: "",
+            beneficiaryId: user_id || "",
             amount: "",
             transactionType: "transfer",
             remarks: "",
@@ -75,10 +77,9 @@ const FundTransfer = () => {
         }
     })
 
-    const verifyBeneficiary = () => {
+    const verifyBeneficiary = (queriedUserId) => {
         // Logic to verifiy beneficiary details
-        BackendAxios.post(`/api/admin/user/info/${TransferFormik.values.beneficiaryId}`).then((res) => {
-            console.log(res.data.data)
+        BackendAxios.post(`/api/admin/user/info/${queriedUserId || TransferFormik.values.beneficiaryId}`).then((res) => {
             setFetchedUser({
                 ...fetchedUser,
                 user_name: res.data.data.first_name + " " + res.data.data.last_name,
@@ -119,15 +120,20 @@ const FundTransfer = () => {
 
     useEffect(() => {
         BackendAxios.get('/api/admin/fetch-admin-funds').then(res => {
-            console.log(res)
-            setRowData(res.data.slice(0,10))
+            setRowData(res.data.data.slice(0, 10))
         }).catch(err => {
             Toast({
                 status: 'error',
                 description: 'Could not fetch transactions'
             })
         })
-    },[])
+    }, [])
+    useEffect(() => {
+        if(Router.isReady){
+            verifyBeneficiary(user_id)
+            TransferFormik.setFieldValue("beneficiaryId", user_id)
+        }
+    }, [Router.isReady])
 
     return (
         <>
@@ -156,6 +162,7 @@ const FundTransfer = () => {
                                     <InputGroup>
                                         <Input
                                             name={'beneficiaryId'}
+                                            value={TransferFormik.values.beneficiaryId}
                                             onChange={TransferFormik.handleChange}
                                             placeholder={'Enter Beneficiary User ID'}
                                         />
@@ -245,7 +252,7 @@ const FundTransfer = () => {
                             <HStack justifyContent={'flex-end'}>
                                 <Button
                                     type='submit' onClick={onOpen}
-                                    colorScheme={'twitter'}>Enter MPIN</Button>
+                                    colorScheme={'twitter'}>Submit</Button>
                             </HStack>
                         </Box>
                     </Box>
@@ -273,7 +280,8 @@ const FundTransfer = () => {
                         <ModalBody>
                             <VStack>
                                 <FormControl w={['full', 'xs']}>
-                                    <FormLabel>Enter Your MPIN</FormLabel>
+                                    <Text>You are making a transaction for {fetchedUser.user_name} of Rs. {TransferFormik.values.amount} </Text>
+                                    <FormLabel>Enter MPIN to confirm</FormLabel>
                                     <HStack spacing={4}>
                                         <PinInput
                                             name={'mpin'} otp

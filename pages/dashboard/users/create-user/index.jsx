@@ -21,6 +21,7 @@ import {
 } from '@chakra-ui/react'
 import Layout from '../../layout'
 import BackendAxios, { FormAxios } from '@/lib/utils/axios'
+import { states } from '@/lib/states'
 
 const Index = () => {
     const [availablePlans, setAvailablePlans] = useState([])
@@ -389,8 +390,11 @@ const Index = () => {
                                                 placeholder='Select here'
                                                 onChange={Formik.handleChange}
                                             >
-                                                <option value="Jammu Kashmir">Jammu Kashmir</option>
-                                                <option value="Delhi">Delhi</option>
+                                            {
+                                                states.map((stateName, key) => {
+                                                    return <option value={stateName} key={key}>{stateName}</option>
+                                                })
+                                            }
                                             </Select>
                                         </FormControl>
                                         <FormControl w={['full']} isRequired>
@@ -414,7 +418,7 @@ const Index = () => {
                             direction={['column', 'row']}
                             spacing={12}
                         >
-                            <FormControl isRequired
+                            <FormControl
                                 w={['full', '36']}
                             >
                                 <FormLabel
@@ -423,28 +427,37 @@ const Index = () => {
                                     borderColor={'teal.300'} cursor={'pointer'}
                                     display={'grid'} placeContent={'center'}
                                     htmlFor={'profilePic'}
+                                    backgroundImage={
+                                        Formik.values.profilePic ?
+                                        URL.createObjectURL(Formik.values.profilePic):
+                                        "#FFFFFFFF"
+                                    }
+                                    backgroundSize={'contain'}
+                                    backgroundRepeat={'no-repeat'}
+                                    backgroundPosition={'center'}
                                 >
-                                    <Text
-                                        fontSize={'xs'}
-                                        fontWeight={'semibold'}
-                                        color={'teal.400'}
-                                    >Choose Profile Pic</Text>
+                                        <Text
+                                            fontSize={'xs'}
+                                            fontWeight={'semibold'}
+                                            color={'teal.400'}
+                                        >Choose Profile Pic</Text>
                                 </FormLabel>
                                 <Input
-                                fontSize={12}
                                     type={'file'}
                                     name={'profilePic'}
                                     id={'profilePic'}
                                     display={'none'}
-                                    onChange={(e) => Formik.setFieldValue('profilePic', e.currentTarget.files[0])}
+                                    onChange={(e) => {
+                                        Formik.setFieldValue('profilePic', e.currentTarget.files[0])
+                                    }}
                                 />
                                 <Button
                                     colorScheme={'red'}
                                     size={'xs'}
-                                    onClick={(e) => Formik.setFieldValue('profilePic', null)}
+                                    onClick={() => Formik.setFieldValue('profilePic', null)}
                                 >Delete</Button>
                             </FormControl>
-                            <FormControl isRequired
+                            <FormControl
                                 w={['full', '36']}
                             >
                                 <FormLabel
@@ -453,6 +466,14 @@ const Index = () => {
                                     borderColor={'teal.300'} cursor={'pointer'}
                                     display={'grid'} placeContent={'center'}
                                     htmlFor={'aadhaarFront'}
+                                    backgroundImage={
+                                        Formik.values.aadhaarFront ?
+                                        URL.createObjectURL(Formik.values.aadhaarFront):
+                                        "#FFFFFFFF"
+                                    }
+                                    backgroundSize={'contain'}
+                                    backgroundRepeat={'no-repeat'}
+                                    backgroundPosition={'center'}
                                 >
                                     <Text
                                         fontSize={'xs'}
@@ -461,7 +482,6 @@ const Index = () => {
                                     >Upload Aadhaar Front</Text>
                                 </FormLabel>
                                 <Input
-                                fontSize={12}
                                     type={'file'}
                                     name={'aadhaarFront'}
                                     id={'aadhaarFront'}
@@ -474,7 +494,7 @@ const Index = () => {
                                     onClick={(e) => Formik.setFieldValue('aadhaarFront', null)}
                                 >Delete</Button>
                             </FormControl>
-                            <FormControl isRequired
+                            <FormControl
                                 w={['full', '36']}
                             >
                                 <FormLabel
@@ -483,6 +503,14 @@ const Index = () => {
                                     borderColor={'teal.300'} cursor={'pointer'}
                                     display={'grid'} placeContent={'center'}
                                     htmlFor={'aadhaarBack'}
+                                    backgroundImage={
+                                        Formik.values.aadhaarBack ?
+                                        URL.createObjectURL(Formik.values.aadhaarBack):
+                                        "#FFFFFFFF"
+                                    }
+                                    backgroundSize={'contain'}
+                                    backgroundRepeat={'no-repeat'}
+                                    backgroundPosition={'center'}
                                 >
                                     <Text
                                         fontSize={'xs'}
@@ -491,7 +519,6 @@ const Index = () => {
                                     >Upload Aadhaar Back</Text>
                                 </FormLabel>
                                 <Input
-                                fontSize={12}
                                     type={'file'}
                                     name={'aadhaarBack'}
                                     id={'aadhaarBack'}
@@ -504,7 +531,7 @@ const Index = () => {
                                     onClick={(e) => Formik.setFieldValue('aadhaarBack', null)}
                                 >Delete</Button>
                             </FormControl>
-                            <FormControl isRequiredl
+                            <FormControl
                                 w={['full', '36']}
                             >
                                 <FormLabel
@@ -513,6 +540,14 @@ const Index = () => {
                                     borderColor={'teal.300'} cursor={'pointer'}
                                     display={'grid'} placeContent={'center'}
                                     htmlFor={'pan'}
+                                    backgroundImage={
+                                        Formik.values.pan ?
+                                        URL.createObjectURL(Formik.values.pan):
+                                        "#FFFFFFFF"
+                                    }
+                                    backgroundSize={'contain'}
+                                    backgroundRepeat={'no-repeat'}
+                                    backgroundPosition={'center'}
                                 >
                                     <Text
                                         fontSize={'xs'}
@@ -521,7 +556,6 @@ const Index = () => {
                                     >Upload PAN Card</Text>
                                 </FormLabel>
                                 <Input
-                                fontSize={12}
                                     type={'file'}
                                     name={'pan'}
                                     id={'pan'}

@@ -13,6 +13,7 @@ import 'jspdf-autotable'
 import { AgGridReact } from 'ag-grid-react'
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
+import { BsChevronDoubleLeft, BsChevronDoubleRight, BsChevronLeft, BsChevronRight } from 'react-icons/bs';
 
 const ExportPDF = () => {
     const doc = new jsPDF('landscape')
@@ -22,7 +23,7 @@ const ExportPDF = () => {
 }
 
 const Ledger = () => {
-    const [rowData, setrowData] = useState([])
+    const [rowData, setRowData] = useState([])
     const [columnDefs, setColumnDefs] = useState([
         {
             headerName: "Transaction ID",
@@ -33,7 +34,7 @@ const Ledger = () => {
             field: "trigered_by"
         },
         {
-            headerName: "User Name",
+            headerName: "Beneficiary",
             field: "name"
         },
         {
@@ -65,15 +66,36 @@ const Ledger = () => {
             field: "created_at"
         },
     ])
+    const [printableRow, setPrintableRow] = useState(rowData)
+    const [pagination, setPagination] = useState({
+        current_page: "1",
+        total_pages: "1",
+        first_page_url: "",
+        last_page_url: "",
+        next_page_url: "",
+        prev_page_url: "",
+    })
 
-    useEffect(()=>{
-        BackendAxios.get('/api/admin/transactions').then((res)=>{
-            console.log(res.data)
-            setrowData(res.data)
-        }).catch(err=>{
+    function fetchLedger(pageLink) {
+        BackendAxios.get(pageLink || `/api/admin/transactions?page=1`).then((res) => {
+            setPagination({
+                current_page: res.data.current_page,
+                total_pages: parseInt(res.data.last_page),
+                first_page_url: res.data.first_page_url,
+                last_page_url: res.data.last_page_url,
+                next_page_url: res.data.next_page_url,
+                prev_page_url: res.data.prev_page_url,
+            })
+            setRowData(res.data.data)
+            setPrintableRow(res.data.data)
+        }).catch(err => {
             console.log(err)
         })
-    },[])
+    }
+
+    useEffect(() => {
+        fetchLedger()
+    }, [])
 
 
     return (
@@ -84,7 +106,43 @@ const Ledger = () => {
                     <Button onClick={ExportPDF} colorScheme={'red'} size={'sm'}>Export PDF</Button>
                 </HStack>
 
-                <Box className='ag-theme-alpine' h={'sm'}>
+
+                <HStack spacing={2} py={4} bg={'white'} justifyContent={'center'}>
+                    <Button
+                        colorScheme={'twitter'}
+                        fontSize={12} size={'xs'}
+                        variant={'outline'}
+                        onClick={() => fetchLedger(pagination.first_page_url)}
+                    ><BsChevronDoubleLeft />
+                    </Button>
+                    <Button
+                        colorScheme={'twitter'}
+                        fontSize={12} size={'xs'}
+                        variant={'outline'}
+                        onClick={() => fetchLedger(pagination.prev_page_url)}
+                    ><BsChevronLeft />
+                    </Button>
+                    <Button
+                        colorScheme={'twitter'}
+                        fontSize={12} size={'xs'}
+                        variant={'solid'}
+                    >{pagination.current_page}</Button>
+                    <Button
+                        colorScheme={'twitter'}
+                        fontSize={12} size={'xs'}
+                        variant={'outline'}
+                        onClick={() => fetchLedger(pagination.next_page_url)}
+                    ><BsChevronRight />
+                    </Button>
+                    <Button
+                        colorScheme={'twitter'}
+                        fontSize={12} size={'xs'}
+                        variant={'outline'}
+                        onClick={() => fetchLedger(pagination.last_page_url)}
+                    ><BsChevronDoubleRight />
+                    </Button>
+                </HStack>
+                <Box className={'ag-theme-alpine'} h={'sm'}>
                     <AgGridReact
                         columnDefs={columnDefs}
                         rowData={rowData}
@@ -93,20 +151,70 @@ const Ledger = () => {
                             floatingFilter: true,
                             resizable: true,
                         }}
+                        onFilterChanged={
+                            (params) => {
+                                setPrintableRow(params.api.getRenderedNodes().map((item) => {
+                                    return (
+                                        item.data
+                                    )
+                                }))
+                            }
+                        }
                     >
 
                     </AgGridReact>
                 </Box>
+                <HStack spacing={2} py={4} bg={'white'} justifyContent={'center'}>
+                    <Button
+                        colorScheme={'twitter'}
+                        fontSize={12} size={'xs'}
+                        variant={'outline'}
+                        onClick={() => fetchLedger(pagination.first_page_url)}
+                    ><BsChevronDoubleLeft />
+                    </Button>
+                    <Button
+                        colorScheme={'twitter'}
+                        fontSize={12} size={'xs'}
+                        variant={'outline'}
+                        onClick={() => fetchLedger(pagination.prev_page_url)}
+                    ><BsChevronLeft />
+                    </Button>
+                    <Button
+                        colorScheme={'twitter'}
+                        fontSize={12} size={'xs'}
+                        variant={'solid'}
+                    >{pagination.current_page}</Button>
+                    <Button
+                        colorScheme={'twitter'}
+                        fontSize={12} size={'xs'}
+                        variant={'outline'}
+                        onClick={() => fetchLedger(pagination.next_page_url)}
+                    ><BsChevronRight />
+                    </Button>
+                    <Button
+                        colorScheme={'twitter'}
+                        fontSize={12} size={'xs'}
+                        variant={'outline'}
+                        onClick={() => fetchLedger(pagination.last_page_url)}
+                    ><BsChevronDoubleRight />
+                    </Button>
+                </HStack>
 
                 <VisuallyHidden>
                     <table id='printable-table'>
                         <thead>
                             <tr>
-                                <td>#</td>
+                                <th>#</th>
                                 {
-                                    columnDefs.map((column, key) => {
+                                    columnDefs.filter((column) => {
+                                        if (column.headerName != "Description") {
+                                            return (
+                                                column
+                                            )
+                                        }
+                                    }).map((column, key) => {
                                         return (
-                                            <td key={key}>{column.headerName}</td>
+                                            <th key={key}>{column.headerName}</th>
                                         )
                                     })
                                 }
@@ -114,14 +222,13 @@ const Ledger = () => {
                         </thead>
                         <tbody>
                             {
-                                rowData.map((data, key) => {
+                                printableRow.map((data, key) => {
                                     return (
                                         <tr key={key}>
-                                            <td>{key+1}</td>
+                                            <td>{key + 1}</td>
                                             <td>{data.transaction_id}</td>
                                             <td>{data.trigered_by}</td>
                                             <td>{data.name}</td>
-                                            <td>{data.description}</td>
                                             <td>{data.service_type}</td>
                                             <td>{data.credit_amount}</td>
                                             <td>{data.debit_amount}</td>

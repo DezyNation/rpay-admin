@@ -82,16 +82,10 @@ const menuOptions = [
     icon: <BsSpeedometer />
   },
   {
-    type: "accordion",
+    type: "link",
     name: "commission",
     icon: <BsPercent />,
-    children: [
-      {
-        title: "create package",
-        link: "/dashboard/commission-package/create-package?pageid=commission",
-        status: true,
-      },
-    ]
+    link: "/dashboard/commission-package?pageid=commission",
   },
   {
     type: "accordion",
@@ -165,11 +159,6 @@ const menuOptions = [
       {
         title: "user ledger",
         link: "/dashboard/reports/transactions/user-ledger?pageId=reports",
-        status: true,
-      },
-      {
-        title: "login report",
-        link: "/dashboard",
         status: true,
       },
     ]

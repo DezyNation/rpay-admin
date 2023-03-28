@@ -25,20 +25,45 @@ import { AgGridReact } from 'ag-grid-react'
 
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
+import BackendAxios from '@/lib/utils/axios'
 
 const Index = () => {
 
 
   const [rowData, setRowData] = useState([
-    { name: "Sangam Kumar", role: "Distributor", datetime: "22 Feb 2023 17:41" }
+    
   ])
 
   const [columnDefs, setColumnDefs] = useState([
-    { field: "name" },
-    { field: "role" },
-    { field: "datetime" },
+    { 
+      field: "user_id",
+      headerName: "User ID"
+    },
+    { 
+      field: "name",
+      headerName: "Name"
+    },
+    { 
+      field: "ip",
+      headerName: "Login IP"
+    },
+    { 
+      field: "latlong",
+      headerName: "Latlong"
+    },
+    { 
+      field: "created_at",
+      headerName: "Timestamp"
+    },
   ])
 
+  useEffect(()=>{
+    BackendAxios.get('/api/admin/logins').then(res=>{
+      setRowData(res.data.data)
+    }).catch(err=>{
+      console.log(err)
+    })
+  },[])
 
   return (
     <>
