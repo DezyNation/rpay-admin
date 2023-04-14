@@ -116,7 +116,7 @@ const CommissionSetup = () => {
 
     function onCellValueChange(params) {
         if (params.data.from && params.data.to && params.data.commission) {
-            BackendAxios.post(`/api/admin/update-commission/`, { ...params.data, package_id: selectedPackage }).then(() => {
+            BackendAxios.get(`/api/admin/update-commission/`, { ...params.data, package_id: selectedPackage }).then(() => {
                 Toast({
                     status: 'success',
                     description: `Commission Updated`
