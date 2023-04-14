@@ -27,7 +27,7 @@ const CreateAdmin = () => {
   })
   const [permissions, setPermissions] = useState(null)
   const [fetchedUser, setFetchedUser] = useState({
-    user_id: "",
+    userId: "",
     user_name: "",
     firm_name: "",
     wallet: "",
@@ -108,20 +108,22 @@ const CreateAdmin = () => {
 
 
   const verifyBeneficiary = () => {
+    setFetchedUser({
+      ...fetchedUser,
+      userId: "",
+      user_name: "",
+      firm_name: "",
+      wallet: "",
+      phone: "",
+      role: "",
+      permissions: []
+    })
     // Logic to verifiy beneficiary details
     BackendAxios.post(`/api/admin/user/info/${fetchedUser.user_id}`).then((res) => {
+
       setFetchedUser({
         ...fetchedUser,
-        user_name: "",
-        firm_name: "",
-        wallet: "",
-        phone: "",
-        role: "",
-        permissions: []
-      })
-      
-      setFetchedUser({
-        ...fetchedUser,
+        userId: res.data.data.id,
         user_name: res.data.data.first_name + " " + res.data.data.last_name,
         firm_name: res.data.data.firm_name,
         phone: res.data.data.phone_number,
@@ -136,6 +138,7 @@ const CreateAdmin = () => {
       })
       setFetchedUser({
         ...fetchedUser,
+        id: "",
         user_name: "",
         firm_name: "",
         wallet: "",
@@ -166,7 +169,7 @@ const CreateAdmin = () => {
 
   function saveUserPermissions() {
     BackendAxios.post('/api/admin/assign-permission', {
-      userId: fetchedUser.user_id,
+      userId: fetchedUser.userId,
       permission: permissions
     }).then(res => {
       Toast({
@@ -180,9 +183,9 @@ const CreateAdmin = () => {
     })
   }
 
-  function changeRole(role){
+  function changeRole(role) {
     BackendAxios.post('/api/admin/new-admin', {
-      userId: fetchedUser.user_id,
+      userId: fetchedUser.userId,
       role: role,
     }).then(res => {
       Toast({
@@ -258,7 +261,7 @@ const CreateAdmin = () => {
           {
             fetchedUser.role == "admin" ? (
               <Box my={4}>
-                <Button colorScheme={'whatsapp'} mb={6} onClick={()=>changeRole('retailer')}>Make Retailer</Button>
+                <Button colorScheme={'whatsapp'} mb={6} onClick={() => changeRole('retailer')}>Make Retailer</Button>
 
                 <Text pb={4} pt={8} fontSize={'lg'}>Manage Permissions</Text>
                 <Flex direction={'row'} gap={10} flexWrap={'wrap'}>
@@ -282,7 +285,7 @@ const CreateAdmin = () => {
                 </Flex>
               </Box>
 
-            ) : fetchedUser.role == "retailer" ? <Button colorScheme={'twitter'} onClick={()=>changeRole('admin')}>Make Admin</Button> : null
+            ) : fetchedUser.role == "retailer" ? <Button colorScheme={'twitter'} onClick={() => changeRole('admin')}>Make Admin</Button> : null
           }
         </Box>
       </Layout>
