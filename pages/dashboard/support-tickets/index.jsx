@@ -64,12 +64,13 @@ const SupportTickets = () => {
     }
 
     useEffect(() => {
-        BackendAxios.get('/api/tickets').then(res => {
+        BackendAxios.get('/api/admin/tickets').then(res => {
             setRowData(res.data)
         }).catch(err=>{
             console.log(err)
         })
     }, [])
+
     return (
         <>
             <Layout pageTitle={'Support Tickets'}>
