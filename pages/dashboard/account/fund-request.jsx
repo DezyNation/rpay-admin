@@ -171,7 +171,7 @@ const FundRequests = () => {
                     }
                     {params.data.status != "processing" &&
                         <Button
-                            size={'xs'} onClick={()=>updateFundRequest("reversed")}
+                            size={'xs'}
                             colorScheme={params.data.status == "approved" ? 'whatsapp' : 'red'}
                             textTransform={'capitalize'}>{params.data.status}</Button>
                     }
