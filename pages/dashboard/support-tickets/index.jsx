@@ -9,6 +9,7 @@ import { AgGridReact } from 'ag-grid-react'
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import Layout from '../layout';
+import BackendAxios from '@/lib/utils/axios';
 
 const SupportTickets = () => {
     const [rowData, setRowData] = useState([])
