@@ -50,6 +50,7 @@ const Index = () => {
       user_id: "",
       password: "",
       otp: "",
+      latlong: ""
     }
   })
 
