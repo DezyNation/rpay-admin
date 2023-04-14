@@ -104,6 +104,13 @@ const Index = () => {
   async function handleLogin() {
     setIsLoading(true)
     try {
+      if(!Cookies.get("latlong")){
+        Toast({
+          title: 'Location not found!',
+          description: 'Allow location access'
+        })
+        return
+      }
       await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/login`, JSON.stringify({
         "authMethod": authMethod,
         ...(authMethod === "email" && { "email": formik.values.user_id }),
